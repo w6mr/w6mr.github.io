@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>模拟王朝 · 御前龙案</title>
+    <style>
+        :root{--bg:#0a0705;--bg2:#1a120c;--bg3:#261b10;--bg4:#3a2a18;--gold:#d4a843;--gold-light:#f0d48a;--gold-dark:#9a7b2f;--red:#b03030;--red-light:#e06050;--green:#4a8a5a;--text:#f0e8d8;--text2:#c0b098;--text3:#908068;--border:#5a4430;--border-light:#8a6a40;--radius:10px;--radius-sm:5px;--shadow:0 6px 25px rgba(0,0,0,.7);--font-title:'Georgia','SimSun','KaiTi',serif;--gold-gradient:linear-gradient(135deg,#f5d77b,#c9a84c,#8a6a20)}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-title);min-height:100vh;background-image:radial-gradient(ellipse at 50% -20%,rgba(120,80,30,.25),transparent 60%)}
+        .hidden{display:none!important}
+        button{font-family:inherit;cursor:pointer;border:1px solid var(--border);background:linear-gradient(180deg,#2a1d10,#1a120c);color:var(--text);padding:6px 10px;border-radius:var(--radius-sm);font-size:.75em;white-space:nowrap;transition:all .25s ease}
+        button:hover{border-color:var(--gold);color:var(--gold-light)}
+        button:disabled{opacity:.4;cursor:not-allowed}
+        .gold-btn{border-color:var(--gold);background:rgba(200,170,80,.25);color:var(--gold-light)}
+        .danger{border-color:var(--red);color:var(--red-light)}
+        .panel{background:linear-gradient(180deg,#1e150e,#160f09);border:1px solid var(--border);border-radius:var(--radius);padding:10px;overflow-y:auto;box-shadow:var(--shadow)}
+        .panel-title{font-size:.82em;color:var(--gold);letter-spacing:3px;border-bottom:2px solid var(--border);padding-bottom:5px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+        .panel-title::before,.panel-title::after{content:'◆';font-size:.55em;color:var(--gold)}
+        .panel-title::after{margin-left:auto}
+        #startScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+        .start-box{background:linear-gradient(180deg,#1e150e,#160f09);border:2px solid var(--gold-dark);border-radius:16px;padding:25px;max-width:680px;width:100%;box-shadow:var(--shadow);position:relative;overflow:hidden}
+        .start-box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--gold-gradient)}
+        .start-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:var(--gold-gradient)}
+        .start-box h1{text-align:center;color:var(--gold-light);font-size:2em;letter-spacing:10px;margin-bottom:4px;text-shadow:0 0 30px rgba(200,170,80,.6)}
+        .subtitle{text-align:center;color:var(--text2);font-size:.85em;margin-bottom:18px;letter-spacing:5px;border-bottom:1px solid rgba(200,170,80,.2);padding-bottom:12px}
+        .novice-select{display:flex;gap:12px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+        .novice-select button{padding:12px 22px;font-size:1em;border-radius:8px;min-width:130px;border:2px solid var(--border);background:linear-gradient(180deg,#2a1d10,#1a120c);color:var(--text2);letter-spacing:2px;transition:all .3s ease}
+        .novice-select button.selected{border-color:var(--gold);background:rgba(200,170,80,.25);color:var(--gold-light);box-shadow:0 0 25px rgba(200,170,80,.4)}
+        .novice-hint{text-align:center;font-size:.75em;color:var(--text3);margin-bottom:10px;min-height:18px}
+        .form-divider{text-align:center;font-size:.7em;color:var(--text3);margin:10px 0;position:relative}
+        .form-divider::before,.form-divider::after{content:'';position:absolute;top:50%;width:30%;height:1px;background:rgba(200,170,80,.2)}
+        .form-divider::before{left:5%}
+        .form-divider::after{right:5%}
+        .start-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+        .form-group{display:flex;flex-direction:column;gap:2px}
+        .form-group label{font-size:.72em;color:var(--text2)}
+        .form-group input,.form-group select{padding:8px 10px;background:rgba(20,14,8,.9);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.85em;font-family:inherit}
+        .form-group input:focus,.form-group select:focus{border-color:var(--gold);outline:none;box-shadow:0 0 8px rgba(200,170,80,.3)}
+        .error-msg{color:var(--red-light);font-size:.75em;min-height:18px;margin-top:4px;text-align:center}
+        .start-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+        .start-actions button{flex:1;padding:12px;font-size:.85em;letter-spacing:2px;border-radius:8px}
+        .save-slots{display:flex;gap:6px;margin-top:8px}
+        .save-slots button{flex:1;padding:6px;font-size:.7em;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2)}
+        .save-slots button.active{border-color:var(--gold);color:var(--gold-light)}
+        #gameScreen{display:flex;flex-direction:column;gap:6px;padding:8px;max-width:1400px;margin:0 auto;min-height:100vh}
+        .game-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:10px 18px;background:linear-gradient(180deg,#1e150e,#160f09);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+        .emblem{width:45px;height:45px;border-radius:50%;background:radial-gradient(circle,var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--gold-light);box-shadow:0 0 20px rgba(200,170,80,.5)}
+        .game-header h2{color:var(--gold-light);font-size:1.2em;letter-spacing:3px}
+        .header-info{font-size:.7em;color:var(--text2)}
+        .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:4px;padding:8px;background:linear-gradient(180deg,#1e150e,#160f09);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+        .dash-item{display:flex;flex-direction:column;align-items:center;padding:5px 3px;background:var(--bg3);border-radius:var(--radius-sm);border:1px solid var(--border);font-size:.68em}
+        .dash-item span:last-child{color:var(--gold-light);font-weight:bold}
+        .main-layout{display:flex;gap:6px;flex:1;min-height:400px}
+        .left-tabs{width:115px;display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+        .tab-btn{padding:5px 3px;text-align:center;font-size:.62em;background:linear-gradient(180deg,#2a1d10,#1a120c);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;white-space:nowrap;letter-spacing:1px}
+        .tab-btn.active{border-color:var(--gold);background:rgba(200,170,80,.25);color:var(--gold-light);box-shadow:0 0 12px rgba(200,170,80,.3)}
+        .center-col{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+        .right-col{width:220px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+        .content-panel{flex:1;min-height:180px}
+        .action-panel{min-height:45px;max-height:140px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:3px;padding:6px}
+        .log-panel{max-height:130px;overflow-y:auto;font-size:.64em}
+        .log-entry{padding:1px 0;border-bottom:1px solid rgba(90,68,48,.3)}
+        .log-entry.important{color:var(--gold-light);font-weight:bold}
+        .log-entry.danger{color:var(--red-light)}
+        .log-entry.success{color:var(--green)}
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:5000}
+        .modal{background:linear-gradient(180deg,#1e150e,#160f09);border:2px solid var(--gold-dark);border-radius:14px;padding:18px;max-width:560px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+        .modal h3{color:var(--gold-light);margin-bottom:8px;font-size:1.1em;text-align:center;letter-spacing:3px}
+        .modal-body{font-size:.85em;line-height:1.7}
+        .modal-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+        .toast-container{position:fixed;top:12px;right:12px;z-index:6000;display:flex;flex-direction:column;gap:3px;max-width:300px}
+        .toast{padding:8px 12px;border-radius:var(--radius-sm);background:linear-gradient(180deg,#2a1d10,#1a120c);border:1px solid var(--gold-dark);color:var(--text);font-size:.72em;box-shadow:var(--shadow);cursor:pointer}
+        .toast.success{border-color:var(--green)}
+        .toast.danger{border-color:var(--red)}
+        @media(max-width:600px){.start-form{grid-template-columns:1fr}.main-layout{flex-direction:column}.left-tabs{width:100%;flex-direction:row;flex-wrap:wrap}.left-tabs .tab-btn{flex:1;min-width:45px;font-size:.55em}.right-col{width:100%;flex-direction:row;flex-wrap:wrap}.dashboard{grid-template-columns:repeat(auto-fit,minmax(60px,1fr))}.novice-select button{min-width:110px;padding:10px 14px}}
+    </style>
+</head>
+<body>
+    <div id="startScreen">
+        <div class="start-box">
+            <h1>模 拟 王 朝</h1>
+            <div class="subtitle">— 开 创 你 的 千 秋 帝 业 —</div>
+            <div class="novice-select">
+                <button id="btnNovice" onclick="Game.selectNovice(true)">🌱 我是新手</button>
+                <button id="btnVeteran" onclick="Game.selectNovice(false)">⚔️ 我是老手</button>
+            </div>
+            <div class="novice-hint" id="noviceHint">请选择游戏经验（必选）</div>
+            <div class="form-divider">— 自 定 义 王 朝 信 息 —</div>
+            <div class="start-form">
+                <div class="form-group"><label>国号</label><input id="inpNation" value="魏国" maxlength="4"></div>
+                <div class="form-group"><label>年号</label><input id="inpEra" value="泰安" maxlength="4"></div>
+                <div class="form-group"><label>皇帝称号</label><input id="inpTitle" value="魏太祖" maxlength="6"></div>
+                <div class="form-group"><label>皇帝姓名</label><input id="inpEmperor" value="魏安" maxlength="8"></div>
+                <div class="form-group"><label>皇后姓名</label><input id="inpEmpress" value="沈青黛" maxlength="8"></div>
+                <div class="form-group"><label>国都</label><input id="inpCapital" value="天城" maxlength="6"></div>
+                <div class="form-group"><label>陪都</label><input id="inpCity" value="石城" maxlength="6"></div>
+                <div class="form-group"><label>难度</label><select id="inpDifficulty" onchange="Game.onDifficultyChange()"><option value="standard">标准</option><option value="hardcore">硬核</option></select><div id="difficultyDesc" style="font-size:.65em;color:var(--text3);">标准：正常平衡；硬核：税收-20%，敌国好战+10%，初始资源-20%。</div></div>
+            </div>
+            <div class="error-msg" id="startError"></div>
+            <div class="start-actions">
+                <button class="gold-btn" id="btnStart1" onclick="Game.startNewGame(1)" disabled title="开始新游戏（存档1）">💾 存档1</button>
+                <button class="gold-btn" id="btnStart2" onclick="Game.startNewGame(2)" disabled title="开始新游戏（存档2）">💾 存档2</button>
+                <button onclick="Game.continueGame(1)" id="btnCont1" class="hidden" title="读取存档1">📜 读档1</button>
+                <button onclick="Game.continueGame(2)" id="btnCont2" class="hidden" title="读取存档2">📜 读档2</button>
+            </div>
+            <div class="save-slots" id="saveSlots"></div>
+        </div>
+    </div>
+    <div id="gameScreen" class="hidden">
+        <div class="game-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="emblem" id="emblemText">魏</div>
+                <div><h2 id="headerTitle">魏·泰安</h2><div class="header-info" id="headerInfo"></div></div>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                <button class="gold-btn" onclick="Game.confirmAdvanceMonth()" title="推进到下个月，结算所有收入支出">📅 下个月</button>
+                <button onclick="Game.saveToSlot(1)" title="保存到存档槽1">💾存1</button>
+                <button onclick="Game.saveToSlot(2)" title="保存到存档槽2">💾存2</button>
+                <button onclick="Game.exportSave()" title="导出存档JSON文件">📤导出</button>
+                <button onclick="document.getElementById('importFile').click()" title="导入存档JSON文件">📥导入</button>
+                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="Game.importSave(event)">
+                <button class="danger" onclick="Game.confirmReset()" title="重置当前游戏">🔄重置</button>
+            </div>
+        </div>
+        <div class="dashboard" id="dashboard"></div>
+        <div class="main-layout">
+            <div class="left-tabs" id="leftTabs"></div>
+            <div class="center-col">
+                <div class="panel content-panel"><div class="panel-title"><span id="panelTitle">国情</span></div><div id="contentBody"></div></div>
+                <div class="panel action-panel" id="actionPanel"></div>
+                <div class="panel log-panel" id="logPanel"></div>
+            </div>
+            <div class="right-col">
+                <div class="panel"><div class="panel-title">皇帝</div><div id="emperorBox"></div></div>
+                <div class="panel"><div class="panel-title">派系</div><div id="factionBox"></div></div>
+                <div class="panel"><div class="panel-title">对话</div><div id="dialogueBox" style="max-height:130px;overflow-y:auto;font-size:.62em;"></div></div>
+            </div>
+        </div>
+    </div>
+    <div id="modalContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
+    <script>
+    var Game=(function(){
+        var SAVE_PREFIX='sim_dynasty_save_v1';
+        var MONTHS=['正月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+        var REALMS=['凡人','炼气','筑基','金丹','元婴','化神','炼虚','合体','大乘','渡劫','帝级','仙境'];
+        var ARMY_TYPES={禁军:{cost:3,power:80,desc:'精锐步兵，拱卫京师'},边军:{cost:2,power:60,desc:'边防军，抵御外敌'},府兵:{cost:1,power:30,desc:'地方民兵，维护治安'},护国军:{cost:5,power:120,desc:'王牌军团，攻守兼备'},龙军:{cost:5,power:110,desc:'铁骑冲锋，士气高昂'},天军:{cost:5,power:100,desc:'弓弩手，远程打击'},地军:{cost:5,power:105,desc:'重甲步兵，固若金汤'},火军:{cost:5,power:115,desc:'火器部队，攻城利器'},水师:{cost:4,power:70,desc:'水军，擅长江海作战'}};
+        var MALE_NAMES=['魏安','张榜','李进','王佐','赵谦','刘策','陈策','杨慎','周延','吴宽','徐阶','戚继光','俞大猷','岳飞','韩世忠','吴玠','刘锜','高拱','张居正','徐达','常遇春','蓝玉','于谦','海瑞','袁崇焕','商鞅','管仲','萧何','诸葛亮','司马懿','王安石','曾国藩','韩信','卫青','霍去病','白起','李靖','张良','曹参','周勃','周亚夫','李广','程不识','赵充国','冯奉世','陈汤','耿恭','班超','马援','段颎','皇甫嵩','朱儁','卢植','公孙瓒','陶谦','袁绍','曹操','刘备','孙坚','孙权','关羽','张飞','赵云','马超','黄忠','魏延','姜维','邓艾','钟会','陆逊','吕蒙','周瑜','鲁肃','甘宁','黄盖','程普','韩当','蒋钦','周泰','陈武','董袭','凌统','徐盛','潘璋','丁奉','诸葛瑾','步骘','阚泽','薛综','陆绩','张昭','张纮','顾雍','虞翻','严畯','是仪','胡综','吴范','刘惇','赵达','皇象','曹不兴','桓阶','陈群','司马朗','司马孚','王朗','华歆','钟繇','卫觊','刘廙','邢颙','毛玠','崔琰','鲍勋','徐奕','何夔','梁习','温恢','贾逵','胡质','张既','游楚','杨阜','辛毗','高柔','满宠','田豫','牵招','郭淮','陈泰','石苞','羊祜','杜预','王濬','唐彬','马隆','胡奋','周浚','张华','裴秀','王沈','荀勖','冯紞','贾充','杨骏','王祥','郑冲','何曾','石鉴','王浑','山涛','王戎','刘伶','阮籍','嵇康','向秀','阮咸','郭象','裴頠','欧阳建','陆机','陆云','潘岳','左思','张载','张协','刘琨','祖逖','温峤','庾亮','桓温','谢安','谢玄','王导','王敦','郗鉴','卞壸','陶侃','庾翼','殷浩','褚裒','荀羡','郗超','王坦之','谢石','谢琰','桓冲','桓玄','刘牢之','刘毅','何无忌','魏咏之','檀凭之','孟昶','刘穆之','徐羡之','傅亮','谢晦','檀道济','王镇恶','沈田子','朱龄石','毛修之','蒯恩','刘钟','虞丘进','孙处','王仲德','向靖','刘怀肃','刘怀敬','刘道怜','刘道规','刘遵考','刘义欣','刘义庆','刘义康','刘义宣','刘义季','刘义恭','刘义隆','刘裕','萧道成','萧衍','陈霸先','王僧辩','陈庆之','韦睿','裴邃','昌义之','曹景宗','杨大眼','马仙琕','韦放','冯道根','康绚','张惠绍','张澄','羊侃','柳仲礼','王琳','周文育','侯安都','杜僧明','欧阳頠','黄法氍','熊昙朗','周迪','留异','陈宝应','徐世谱','周敷','余孝顷','陆子隆','钱道戢','骆牙','孙玚','吴明彻','程灵洗','荀朗','华皎','裴忌','萧摩诃','鲁广达','樊毅','任忠','周罗睺','陈慧纪','陈叔宝','隋文帝','杨素','高颎','苏威','李德林','贺若弼','韩擒虎','史万岁','长孙晟','宇文述','虞庆则','元胄','崔弘度','于仲文','杨义臣','裴仁基','王世充','窦建德','刘黑闼','李密','杜伏威','辅公祏','沈法兴','李子通','林士弘','徐圆朗','高开道','梁师都','刘武周','郭子和','张长逊','薛举','李轨','萧铣','曹武彻','刘洎','张亮','侯君集','张公谨','高士廉','长孙无忌','尉迟敬德','秦琼','程咬金','段志玄','刘弘基','屈突通','殷开山','柴绍','长孙顺德','张亮','侯君集','张公谨','高士廉','于志宁','褚遂良','许敬宗','李义府','上官仪','狄仁杰','张柬之','姚崇','宋璟','张说','张九龄','裴度','李德裕','牛僧孺','李宗闵','白敏中','令狐绹','崔铉','杜悰','萧倣','周墀','马植','魏扶','崔龟从','郑肃','卢商','裴休','杨收','曹确','刘瞻','于琮','韦保衡','路岩','卢携','郑畋','王铎','韦昭度','张濬','刘崇望','徐彦若','崔昭纬','李磎','陆扆','韩偓','吴融','卢光启','苏检','王溥','刘崇鲁','裴枢','柳璨','朱全忠','敬翔','李振','裴迪','赵光逢','杜晓','薛贻矩','张策','高劭','赵崇','苏循','郑珏','杨涉','张文蔚','韦贻范','姚洎','孙偓','陆希声','李巨川','刘崇龟','赵光裔','刘隐','王审知','钱镠','马殷','杨行密','李茂贞','王建','孟知祥','李存勖','李嗣源','石敬瑭','刘知远','郭威','柴荣'];
+        var FEMALE_NAMES=['沈青黛','萧玉儿','李婉','王秀','陈婷','赵灵儿','周芷','吴欣','郑柔','冯玲','褚秀','卫兰','林月如','苏小小','柳如是','许晴','何雨','吕雉','曹颖','高圆圆','蔡文姬','韩雪','彭丽','曾柔','史湘云','唐婉','薛宝钗','雷蕾','倪虹','汤唯','殷桃','罗敷','毕夏','郝思嘉','安以轩','常远','乐瑶','于曼','傅艺','齐芳','康宁','余诗','元秋','顾盼','孟姜','黄蓉','穆桂英','姚木兰','邵华','汪诗诗','祁红','毛晓彤','禹彤','狄青','米雪','贝儿','明玉','纪春','谈允','宋茜','庞统','熊黛','纪昀','舒淇','祝枝山','董卿','梁红玉','杜若','阮玲玉','蓝采和','闵柔','席慕蓉','季布','贾静雯','路遥','江疏影','童蕾','颜丹晨','郭采洁','梅艳芳','林心如','钟楚红','徐熙媛','邱淑贞','高胜美','蔡少芬','田馥甄','胡冰卿','霍思燕','万茜','柯蓝','卢靖姗','莫文蔚','裘千尺','干露露','应采儿','宗馥莉','丁当','宣萱','邓丽君','郁可唯','杭天琪','包文婧','左小青','崔雪莉','吉克隽逸','龚琳娜','程潇','邢菲','陆毅','翁美玲','甄子丹','曲婉婷','汲黯','糜竺','井柏然','段奕宏','富大龙','巫启贤','焦恩俊','巴特尔','车晓','侯勇','全智贤','班婕妤','秋瓷炫','伊能静','甘薇','厉娜','祖峰','武艺','符龙飞','刘能','景岗山','叶问','韶华','黎姿','印小天','白百何','濮存昕','卓依婷','蔺相如','屠洪刚','蒙曼','池子','乔任梁','谭松韵','翟天临','劳春燕','姬发','申军谊','冉莹颖','郦波','桑兰','桂纶镁','牛犇','通州','边潇潇','扈三娘','燕十三','浦发','尚雯婕','温碧霞','柴静','瞿颖','阎维文','连战','茹萍','艾青','容祖儿','向华强','古龙','易中天','戈壁','廖凡','庾澄庆','耿乐','满文军','弘一','匡衡','文天祥','寇世勋','东野','欧豪','利智','巩汉林','聂远','晁盖','勾践','敖包','融创','辛弃疾','那英','饶雪漫','曾舜晞','沙溢','鞠婧祎','丰臣','关晓彤','查良镛','荆轲','游本昌','竺可桢','盖茨','桓温'];
+        var POLICIES=[{name:'休养生息',cost:2000000,duration:6,effect:'民心+3/月',neg:'税收-10%',desc:'轻徭薄赋，与民休息'},{name:'重农抑商',cost:1000000,duration:4,effect:'粮产+8%/月',neg:'商业-10%',desc:'奖励耕织，限制商贾'},{name:'整军经武',cost:3000000,duration:6,effect:'士气+3/月',neg:'国库-5%',desc:'整顿军备，训练士卒'},{name:'崇文兴教',cost:1500000,duration:5,effect:'文官+2/月',neg:'武将-2',desc:'尊崇儒学，广设学校'},{name:'开疆拓土',cost:4000000,duration:8,effect:'国运+3/月',neg:'民心-2/月',desc:'征伐四方，扩张版图'},{name:'轻徭薄赋',cost:1200000,duration:5,effect:'民心+4/月',neg:'税收-15%',desc:'减轻赋税，宽待百姓'},{name:'均田制',cost:1800000,duration:6,effect:'农业+5%/月',neg:'宗室-3',desc:'按口授田，抑制兼并'},{name:'市易法',cost:2000000,duration:5,effect:'商业+5%/月',neg:'文官-2',desc:'官府平抑物价，促进贸易'},{name:'保甲法',cost:1500000,duration:5,effect:'治安+10%',neg:'民心-2',desc:'十户一保，联防联治'},{name:'青苗法',cost:800000,duration:4,effect:'粮产+5%/月',neg:'国库-3%',desc:'官府贷粮，助农生产'},{name:'募役法',cost:1200000,duration:4,effect:'税收+5%/月',neg:'民心-3',desc:'以钱代役，解放劳力'},{name:'方田均税法',cost:1500000,duration:5,effect:'税收+10%/月',neg:'地主-5',desc:'清丈田亩，均平赋税'},{name:'盐铁专卖',cost:2500000,duration:6,effect:'税收+15%',neg:'民心-3/月',desc:'官府专营盐铁'},{name:'均输平准',cost:1800000,duration:5,effect:'商业+10%',neg:'文官-3',desc:'官府调控物价'},{name:'算缗告缗',cost:2000000,duration:4,effect:'税收+20%',neg:'民心-5/月',desc:'征收财产税'},{name:'编户齐民',cost:1000000,duration:5,effect:'人口+5%',neg:'民心-2',desc:'加强户籍管理'},{name:'推恩令',cost:1500000,duration:6,effect:'宗室+10',neg:'武将-5',desc:'削弱诸侯势力'},{name:'常平仓',cost:1200000,duration:5,effect:'粮储+10%',neg:'税收-3%',desc:'设置粮仓平抑粮价'}];
+        var LOCAL_SYSTEMS=[{name:'州县制',desc:'税收+10%',neg:'效率-5%'},{name:'郡县制',desc:'治安+15%',neg:'税收-5%'},{name:'行省制',desc:'效率+10%',neg:'治安-5%'},{name:'分封制',desc:'宗室+15%',neg:'中央-10%'},{name:'藩镇制',desc:'武将+10%',neg:'税收-8%'},{name:'土司制',desc:'边境+10%',neg:'税收-5%'},{name:'都护府制',desc:'边疆+15%',neg:'财政-5%'},{name:'羁縻制',desc:'边境+15%',neg:'税收-10%'},{name:'卫所制',desc:'军事+10%',neg:'财政-5%'},{name:'保甲制',desc:'治安+10%',neg:'民心-3'},{name:'三省六部制',desc:'效率+15%',neg:'俸禄+5%'},{name:'改土归流',desc:'税收+10%',neg:'边境-10%'}];
+        var HISTORICAL_BONUS={'韩信':{force:10,wisdom:8,loyalty:5,morality:-2},'卫青':{force:12,wisdom:7,loyalty:8,morality:3},'霍去病':{force:15,wisdom:6,loyalty:7,morality:2},'诸葛亮':{force:3,wisdom:15,literature:10,loyalty:15,morality:12},'岳飞':{force:13,wisdom:8,loyalty:15,morality:12},'白起':{force:16,wisdom:9,loyalty:6,morality:-5},'李靖':{force:11,wisdom:12,loyalty:8,morality:4},'萧何':{force:2,wisdom:12,literature:10,loyalty:12,morality:10},'张良':{force:4,wisdom:15,literature:10,loyalty:10,morality:10},'曹操':{force:8,wisdom:13,literature:9,loyalty:3,morality:2},'关羽':{force:16,wisdom:6,loyalty:15,morality:12},'张飞':{force:15,wisdom:3,loyalty:14,morality:6},'赵云':{force:14,wisdom:8,loyalty:15,morality:12},'马超':{force:15,wisdom:5,loyalty:6,morality:5},'黄忠':{force:13,wisdom:6,loyalty:13,morality:10},'周瑜':{force:7,wisdom:14,literature:10,loyalty:12,morality:9},'陆逊':{force:6,wisdom:13,literature:9,loyalty:12,morality:10},'吕蒙':{force:9,wisdom:12,loyalty:11,morality:8},'司马懿':{force:5,wisdom:14,literature:10,loyalty:4,morality:3},'狄仁杰':{force:3,wisdom:13,literature:11,loyalty:14,morality:15},'包拯':{force:4,wisdom:12,literature:10,loyalty:14,morality:15},'海瑞':{force:3,wisdom:10,literature:9,loyalty:15,morality:15},'张居正':{force:4,wisdom:14,literature:12,loyalty:8,morality:6},'王安石':{force:3,wisdom:13,literature:12,loyalty:10,morality:8},'商鞅':{force:4,wisdom:13,literature:9,loyalty:7,morality:3},'管仲':{force:3,wisdom:14,literature:10,loyalty:12,morality:9},'曹参':{force:6,wisdom:11,loyalty:11,morality:9}};
+        var CULTIVATION_METHODS=[{name:'吐纳术',speed:1,breakRate:0.05,desc:'基础功法，修炼速度普通'},{name:'紫气东来',speed:1.5,breakRate:0.08,desc:'修炼速度较快，突破概率略高'},{name:'太虚诀',speed:2,breakRate:0.12,desc:'高级功法，修炼极快，突破概率较高'},{name:'阴阳调和',speed:1.2,breakRate:0.06,desc:'修炼速度中等，可提升健康恢复'},{name:'混元功',speed:1.8,breakRate:0.10,desc:'修炼速度较快，对心魔有抗性'}];
+        var gameState=null,currentTab='dashboard',isProcessing=false,currentSlot=1,noviceSelected=null;
+        function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
+        function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+        function fmt(n){if(n===undefined||n===null||isNaN(n))return'0';if(n>=100000000)return(n/100000000).toFixed(1)+'亿';if(n>=10000)return(n/10000).toFixed(1)+'万';return Math.floor(n).toString();}
+        function getMonthName(m){return MONTHS[m-1]||m+'月';}
+        function getDate(){return gameState.eraName+gameState.year+'年'+getMonthName(gameState.month);}
+        function getId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5);}
+        function showToast(msg,type){var c=document.getElementById('toastContainer');var t=document.createElement('div');t.className='toast'+(type?' '+type:'');t.textContent=msg;t.onclick=function(){t.remove();};c.appendChild(t);setTimeout(function(){t.remove();},3500);}
+        function showModal(title,body,actions){var c=document.getElementById('modalContainer');var actHtml='';if(actions){for(var i=0;i<actions.length;i++){actHtml+='<button class="'+(actions[i].danger?'danger':'')+'" onclick="'+actions[i].onclick+'">'+actions[i].label+'</button>';}}c.innerHTML='<div class="modal-overlay" onclick="if(event.target===this)Game.closeModal()"><div class="modal"><h3>'+title+'</h3><div class="modal-body">'+body+'</div><div class="modal-actions">'+actHtml+'</div></div></div>';}
+        function closeModal(){document.getElementById('modalContainer').innerHTML='';}
+        function addLog(msg,type){gameState.chronicle.push({id:++gameState.logIdCounter,time:getDate(),message:msg,type:type||'info'});if(gameState.chronicle.length>300)gameState.chronicle.shift();}
+        function addDialogue(speaker,content){gameState.dialogues.push({id:++gameState.dialogueIdCounter,time:getDate(),speaker:speaker,content:content});if(gameState.dialogues.length>200)gameState.dialogues.shift();}
+        function getSaveKey(slot){return SAVE_PREFIX+'_slot'+slot;}
+        function saveToSlot(slot){if(!gameState)return;try{localStorage.setItem(getSaveKey(slot),JSON.stringify(gameState));showToast('已保存','success');updateSaveSlots();}catch(e){console.warn('保存失败',e);}}
+        function loadFromSlot(slot){try{var d=localStorage.getItem(getSaveKey(slot));if(d){var p=JSON.parse(d);if(p&&p.nationName){gameState=p;normalizeState(gameState);currentSlot=slot;return true;}}}catch(e){console.error('读取存档失败',e);}return false;}
+        function hasSaveSlot(slot){return !!localStorage.getItem(getSaveKey(slot));}
+        function updateSaveSlots(){var el=document.getElementById('saveSlots');if(el)el.innerHTML='<button class="'+(hasSaveSlot(1)?'active':'')+'" onclick="Game.continueGame(1)" title="读取存档1">存档1'+(hasSaveSlot(1)?'（有）':'（空）')+'</button><button class="'+(hasSaveSlot(2)?'active':'')+'" onclick="Game.continueGame(2)" title="读取存档2">存档2'+(hasSaveSlot(2)?'（有）':'（空）')+'</button>';}
+        function exportSave(){if(!gameState){showToast('无存档可导出','danger');return;}var data=JSON.stringify(gameState);var blob=new Blob([data],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='模拟王朝存档_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showToast('存档已导出','success');}
+        function importSave(event){var file=event.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){try{var data=JSON.parse(e.target.result);if(data&&data.nationName){gameState=data;normalizeState(gameState);currentSlot=1;saveToSlot(1);document.getElementById('startScreen').classList.add('hidden');document.getElementById('gameScreen').classList.remove('hidden');refreshUI();showToast('存档导入成功','success');}else{showToast('无效的存档文件','danger');}}catch(err){showToast('存档解析失败','danger');}};reader.readAsText(file);event.target.value='';}
+        function deepDefaults(obj, defaults){if(obj===undefined||obj===null) obj={};for(var key in defaults){if(defaults.hasOwnProperty(key)){var dv=defaults[key];if(typeof dv==='object' && dv!==null && !Array.isArray(dv)){obj[key]=deepDefaults(obj[key],dv);} else if(Array.isArray(dv)){if(!Array.isArray(obj[key])) obj[key]=dv.slice();} else {if(obj[key]===undefined) obj[key]=dv;}}}return obj;}
+        function onDifficultyChange(){var diff=document.getElementById('inpDifficulty').value;var desc=document.getElementById('difficultyDesc');if(diff==='standard'){desc.textContent='标准：正常平衡；硬核：税收-20%，敌国好战+10%，初始资源-20%。';}else{desc.textContent='硬核：税收-20%，敌国好战+10%，初始资源-20%，更适合挑战。';}}
+function normalizeState(s){
+    try{
+        // 确保 s 是对象
+        if(!s || typeof s !== 'object') s = {};
+        var defaultState = createInitialState({nationName:'',eraName:'',emperorTitle:'',emperorName:'',empressName:'',capital:'',startCity:'',difficulty:'standard'});
+        var keep = {nationName:s.nationName,eraName:s.eraName,emperorTitle:s.emperorTitle,emperorName:s.emperorName,empressName:s.empressName,capital:s.capital,startCity:s.startCity,difficulty:s.difficulty};
+        s = deepDefaults(s, defaultState);
+        // 恢复基本字段
+        for(var k in keep){ if(keep[k]!==undefined) s[k]=keep[k]; }
+        // 人口强制修复
+        if(!s.population || isNaN(Number(s.population))) s.population = 4000;
+        s.population = Math.max(0, Number(s.population));
+        // 国库粮储等数字兜底
+        s.treasury = Number(s.treasury) || 30000000;
+        s.grain = Number(s.grain) || 100000;
+        s.iron = Number(s.iron) || 5000;
+        s.cloth = Number(s.cloth) || 10000;
+        s.medicine = Number(s.medicine) || 2000;
+        s.wood = Number(s.wood) || 8000;
+        s.stone = Number(s.stone) || 5000;
+        s.peopleSupport = Number(s.peopleSupport) || 60;
+        s.administrationEfficiency = Number(s.administrationEfficiency) || 60;
+        s.armyMorale = Number(s.armyMorale) || 60;
+        s.armyPower = Number(s.armyPower) || 50;
+        s.armyTraining = Number(s.armyTraining) || 1;
+        s.emperorHealth = Number(s.emperorHealth) || 80;
+        s.emperorHealthMax = Number(s.emperorHealthMax) || 100;
+        s.emperorAge = Number(s.emperorAge) || 25;
+        s.prestige = Number(s.prestige) || 55;
+        s.year = Number(s.year) || 1;
+        s.month = Number(s.month) || 1;
+        s.harem.budget = Number(s.harem.budget) || 5000;
+        s.harem.nannies = Number(s.harem.nannies) || 0;
+        s.harem.midwives = Number(s.harem.midwives) || 0;
+        if(!s.harem.loveCount) s.harem.loveCount = 0;
+        // 军队数值强制
+        if(!s.army) s.army = {};
+        Object.keys(defaultState.army).forEach(function(k){ 
+            s.army[k] = Number(s.army[k]) || 0; 
+        });
+        // 后宫成员
+        if(!s.harem.members) s.harem.members=[];
+        s.harem.members.forEach(function(m){ 
+            m = deepDefaults(m, {id:'', name:'', rank:'美人', age:18, pregnant:false, pregnancyMonth:0, children:[], favor:60, hasNanny:false, hasMidwife:false, family:'平民', personality:'温婉', talent:'无', ambition:20, health:80, favorLevel:1});
+            m.favor = Number(m.favor) || 60;
+            m.age = Number(m.age) || 18;
+            m.health = Number(m.health) || 80;
+        });
+        // 子嗣
+        if(!s.heirs) s.heirs=[];
+        s.heirs.forEach(function(h){ 
+            h = deepDefaults(h, {id:'', name:'', gender:'皇女', motherId:'', motherName:'', birthYear:1, birthMonth:1, age:0, abilities:{武力:0,智力:0,政治:0,魅力:0}, title:'', personality:'平庸', talent:'无', teacher:'', education:{文:0,武:0,政:0,谋:0}, isCrownPrince:false, title2:'无'});
+            h.age = Number(h.age) || 0;
+        });
+        // 州府
+        if(!s.provinces) s.provinces=[];
+        s.provinces.forEach(function(p){ 
+            p = deepDefaults(p, {id:'', name:'', governor:'', population:0, citizenry:60, tax:0, garrison:0, special:'无', level:1});
+            p.population = Number(p.population) || 100;
+            p.citizenry = Number(p.citizenry) || 60;
+            p.tax = Number(p.tax) || 20000;
+            p.garrison = Number(p.garrison) || 10000;
+            p.level = Number(p.level) || 1;
+        });
+        // 官员
+        if(!s.officials) s.officials={};
+        s.officials = deepDefaults(s.officials, {内阁首辅:{name:'',ability:70,loyalty:70,faction:'文官',integrity:80,age:40,experience:10,favor:50,morality:70,force:50,literature:70,wisdom:70,background:'科举',factionGroup:''},六部尚书:{}});
+        var departments=['吏部','户部','礼部','兵部','刑部','工部'];
+        departments.forEach(function(dep){ 
+            if(!s.officials.六部尚书[dep]) s.officials.六部尚书[dep]={name:'',ability:70,loyalty:70,faction:'文官',integrity:80,age:40,experience:10,favor:50,morality:70,force:50,literature:70,wisdom:70,background:'科举',factionGroup:''};
+            else s.officials.六部尚书[dep] = deepDefaults(s.officials.六部尚书[dep], {name:'',ability:70,loyalty:70,faction:'文官',integrity:80,age:40,experience:10,favor:50,morality:70,force:50,literature:70,wisdom:70,background:'科举',factionGroup:''});
+        });
+        // 基础设施
+        if(!s.infrastructure) s.infrastructure={};
+        Object.keys(defaultState.infrastructure).forEach(function(k){ 
+            if(s.infrastructure[k]===undefined) s.infrastructure[k]=defaultState.infrastructure[k]; 
+            s.infrastructure[k] = Number(s.infrastructure[k]) || 0;
+        });
+        // 科技
+        if(!s.technology) s.technology={};
+        ['农业','军事','商业','文化','工业','医药'].forEach(function(t){ 
+            if(s.technology[t]===undefined) s.technology[t]=0; 
+            s.technology[t] = Number(s.technology[t]) || 0;
+        });
+        // 修仙
+        if(!s.cultivation) s.cultivation={unlocked:false,realm:'凡人',realmIndex:0,pills:[],beastCount:0,cultivationExp:0,cultivationMaxExp:100,method:'吐纳术',learnedMethods:['吐纳术'],specialPolicy:''};
+        else{
+            if(s.cultivation.pills===undefined) s.cultivation.pills=[];
+            if(s.cultivation.beastCount===undefined) s.cultivation.beastCount=0;
+            if(s.cultivation.unlocked===undefined) s.cultivation.unlocked=false;
+            if(s.cultivation.realm===undefined) s.cultivation.realm='凡人';
+            if(s.cultivation.realmIndex===undefined) s.cultivation.realmIndex=0;
+            if(s.cultivation.cultivationExp===undefined) s.cultivation.cultivationExp=0;
+            if(s.cultivation.cultivationMaxExp===undefined) s.cultivation.cultivationMaxExp=100;
+            if(s.cultivation.method===undefined) s.cultivation.method='吐纳术';
+            if(s.cultivation.learnedMethods===undefined) s.cultivation.learnedMethods=['吐纳术'];
+            if(s.cultivation.specialPolicy===undefined) s.cultivation.specialPolicy='';
+        }
+        // 外交
+        if(!s.diplomacy||!s.diplomacy.length) s.diplomacy=[];
+        s.diplomacy.forEach(function(d){ 
+            d=deepDefaults(d,{name:'',relation:40,atWar:false,army:0,population:0,cities:0,aggression:50,tradeAgreement:false,wartimeAlly:false,armyType:'步兵',generalName:'',generalAbility:60,wallLevel:1,foodReserve:5000,isAlly:false});
+            d.relation = Number(d.relation) || 40;
+            d.army = Number(d.army) || 0;
+            d.population = Number(d.population) || 0;
+            d.cities = Number(d.cities) || 1;
+            d.aggression = Number(d.aggression) || 50;
+        });
+        var extraCountries = ['大宛','月氏','乌孙','楼兰','鲜卑','契丹','女真','大理','占城','骠国','柔然','高昌','龟兹','于阗','党项'];
+        extraCountries.forEach(function(name){
+            if(!s.diplomacy.some(function(d){return d.name===name;})){
+                s.diplomacy.push({name:name,relation:35+Math.floor(Math.random()*20),atWar:false,army:20000+Math.floor(Math.random()*50000),population:50+Math.floor(Math.random()*200),cities:1+Math.floor(Math.random()*4),aggression:30+Math.floor(Math.random()*50),tradeAgreement:false,wartimeAlly:false,armyType:'步兵',generalName:'',generalAbility:60,wallLevel:1,foodReserve:5000,isAlly:false});
+            }
+        });
+        // 派系
+        if(!s.factions) s.factions={文官:50,武将:50,宗室:50,外戚:50,宦官:45};
+        s.factions.文官 = Number(s.factions.文官) || 50;
+        s.factions.武将 = Number(s.factions.武将) || 50;
+        s.factions.宗室 = Number(s.factions.宗室) || 50;
+        s.factions.外戚 = Number(s.factions.外戚) || 50;
+        s.factions.宦官 = Number(s.factions.宦官) || 45;
+        // 将领
+        if(!s.generals||!s.generals.length) s.generals=['于谦','徐达','戚继光','岳飞','韩世忠','吴玠','刘锜','俞大猷','常遇春','蓝玉'];
+        s.generals = s.generals.map(function(g){ 
+            if(typeof g === 'string'){ 
+                return {name:g,command:50+Math.floor(Math.random()*40),force:50+Math.floor(Math.random()*40),wisdom:50+Math.floor(Math.random()*40),loyalty:70+Math.floor(Math.random()*20),experience:10,alive:true,injury:0,post:''}; 
+            } else { 
+                return deepDefaults(g,{name:'',command:50,force:50,wisdom:50,loyalty:70,experience:10,alive:true,injury:0,post:''}); 
+            } 
+        });
+        // 军队装备等级
+        if(!s.armyEquipment) s.armyEquipment={};
+        Object.keys(ARMY_TYPES).forEach(function(k){ 
+            if(s.armyEquipment[k]===undefined) s.armyEquipment[k]=0; 
+            s.armyEquipment[k] = Number(s.armyEquipment[k]) || 0;
+        });
+        // 朝会记录
+        if(!s.courtRecords) s.courtRecords=[];
+        // 密奏
+        if(!s.secretReports) s.secretReports=[];
+        // 廷议
+        if(!s.courtDebates) s.courtDebates=[];
+        // 派系斗争事件
+        if(!s.factionEvents) s.factionEvents=[];
+        // 商业管理
+        if(!s.commerce) s.commerce={市舶司:0,商路:0,盐引:0,茶马互市:0};
+        // 仓储
+        if(!s.grainStorage) s.grainStorage={lastGrain:0};
+        // 联合出征
+        if(!s.activeExpeditions) s.activeExpeditions=0;
+        if(!s.expeditionForces) s.expeditionForces=[];
+        // 官员调换
+        if(!s.idleOfficials) s.idleOfficials=[];
+        if(!s.militaryPosts) s.militaryPosts={大将军:'',骠骑将军:'',车骑将军:'',卫将军:''};
+        // 成就加成
+        if(!s.achievementBonus) s.achievementBonus={taxRate:0};
+        if(!s.achievementLevels) s.achievementLevels={};
+        // 新增正向反馈字段
+        if(!s.consecutiveDiligentMonths) s.consecutiveDiligentMonths=0;
+        if(!s.efficiencyBonusTurns) s.efficiencyBonusTurns=0;
+        if(!s.supportMilestones) s.supportMilestones=[];
+        if(!s.buildStreak) s.buildStreak=0;
+        if(!s.courtDebateCostReduction) s.courtDebateCostReduction=false;
+        if(!s.emperorHealthMax) s.emperorHealthMax=100;
+        if(!s.examsHeld) s.examsHeld=0;
+        if(!s.totalActionsThisMonth) s.totalActionsThisMonth=0;
+        if(!s.techResearchThisMonth) s.techResearchThisMonth=0;
+        if(!s.isProcessing) s.isProcessing=false;
+        if(!s.inCourt) s.inCourt=false;
+        if(!s.gameOver) s.gameOver=false;
+        if(!s.spiritBeasts) s.spiritBeasts=[];
+        if(!s.achievements) s.achievements=[];
+        if(!s.destinyPoints) s.destinyPoints=10;
+        if(!s.tradeAgreements) s.tradeAgreements=[];
+        if(!s.wartimeAllies) s.wartimeAllies=[];
+        if(!s.warPenaltyTurns) s.warPenaltyTurns={};
+        // 确保人口不为零
+        s.population = Math.max(1, Number(s.population) || 4000);
+        return s;
+    }catch(e){
+        console.error('存档修复失败，使用默认存档',e);
+        return createInitialState({});
+    }
+}
+
+function validateInput(str,min,max){if(!str||str.trim().length<min||str.trim().length>max)return false;if(/[<>/\\"'&%$#@!*(){}[\]|^~`]/.test(str))return false;return true;}
+
+function createInitialState(c){
+    c=c||{};
+    var harem=[];
+    var ranks=['皇后','贵妃','淑妃','德妃','贤妃','昭仪','昭容','修仪','修容','充仪','充媛','充容'];
+    var personalities=['温婉','活泼','端庄','冷艳','心机','善良','高傲','柔顺'];
+    for(var i=0;i<12;i++){
+        harem.push({
+            id:'h'+i,
+            name:i===0?(c.empressName||'沈青黛'):rand(FEMALE_NAMES),
+            rank:ranks[i]||'美人',
+            age:18+i,
+            pregnant:false,
+            pregnancyMonth:0,
+            children:[],
+            favor:60-i,
+            hasNanny:false,
+            hasMidwife:false,
+            family:rand(['平民','官宦','世家','商贾','武将','文臣']),
+            personality:rand(personalities),
+            talent:rand(['琴','棋','书','画','舞','歌']),
+            ambition:10+Math.floor(Math.random()*40),
+            health:80+Math.floor(Math.random()*15),
+            favorLevel:1
+        });
+    }
+    var provinces=[
+        {id:'p1',name:c.capital||'天城',governor:'张廷玉',population:500,citizenry:65,tax:50000,garrison:50000,special:'国都',level:2},
+        {id:'p2',name:c.startCity||'石城',governor:'刘基',population:300,citizenry:60,tax:30000,garrison:30000,special:'无',level:1},
+        {id:'p3',name:'幽州',governor:'徐达',population:250,citizenry:55,tax:25000,garrison:40000,special:'边患',level:1},
+        {id:'p4',name:'荆州',governor:'杨士奇',population:400,citizenry:58,tax:38000,garrison:25000,special:'无',level:1},
+        {id:'p5',name:'扬州',governor:'海瑞',population:350,citizenry:62,tax:42000,garrison:20000,special:'商贸',level:1},
+        {id:'p6',name:'益州',governor:'李善长',population:280,citizenry:56,tax:26000,garrison:22000,special:'无',level:1}
+    ];
+    var diplomacy=[
+        {name:'北狄',relation:40,atWar:false,army:80000,population:300,cities:5,aggression:70,tradeAgreement:false,wartimeAlly:false,armyType:'骑兵',generalName:'呼延烈',generalAbility:70,wallLevel:2,foodReserve:8000,isAlly:false},
+        {name:'南越',relation:50,atWar:false,army:50000,population:200,cities:3,aggression:40,tradeAgreement:false,wartimeAlly:false,armyType:'步兵',generalName:'赵佗',generalAbility:65,wallLevel:1,foodReserve:6000,isAlly:false},
+        {name:'西蜀',relation:35,atWar:false,army:70000,population:250,cities:4,aggression:65,tradeAgreement:false,wartimeAlly:false,armyType:'弓兵',generalName:'孟获',generalAbility:60,wallLevel:2,foodReserve:7000,isAlly:false},
+        {name:'东海',relation:45,atWar:false,army:45000,population:150,cities:2,aggression:30,tradeAgreement:false,wartimeAlly:false,armyType:'水师',generalName:'海无涯',generalAbility:55,wallLevel:1,foodReserve:5000,isAlly:false},
+        {name:'西凉',relation:42,atWar:false,army:60000,population:180,cities:3,aggression:60,tradeAgreement:false,wartimeAlly:false,armyType:'骑兵',generalName:'马腾',generalAbility:68,wallLevel:2,foodReserve:6500,isAlly:false},
+        {name:'高句丽',relation:48,atWar:false,army:40000,population:120,cities:2,aggression:50,tradeAgreement:false,wartimeAlly:false,armyType:'步兵',generalName:'泉盖',generalAbility:58,wallLevel:2,foodReserve:5500,isAlly:false},
+        {name:'吐蕃',relation:38,atWar:false,army:90000,population:350,cities:6,aggression:80,tradeAgreement:false,wartimeAlly:false,armyType:'骑兵',generalName:'松赞',generalAbility:72,wallLevel:3,foodReserve:9000,isAlly:false},
+        {name:'扶余',relation:46,atWar:false,army:30000,population:80,cities:1,aggression:35,tradeAgreement:false,wartimeAlly:false,armyType:'步兵',generalName:'解慕',generalAbility:52,wallLevel:1,foodReserve:4000,isAlly:false},
+        {name:'倭国',relation:40,atWar:false,army:35000,population:100,cities:2,aggression:75,tradeAgreement:false,wartimeAlly:false,armyType:'水师',generalName:'卑弥呼',generalAbility:62,wallLevel:2,foodReserve:5000,isAlly:false},
+        {name:'南诏',relation:44,atWar:false,army:32000,population:90,cities:1,aggression:55,tradeAgreement:false,wartimeAlly:false,armyType:'步兵',generalName:'阁罗凤',generalAbility:58,wallLevel:1,foodReserve:4500,isAlly:false}
+    ];
+    var extraCountries = ['大宛','月氏','乌孙','楼兰','鲜卑','契丹','女真','大理','占城','骠国','柔然','高昌','龟兹','于阗','党项'];
+    extraCountries.forEach(function(name){
+        diplomacy.push({name:name,relation:35+Math.floor(Math.random()*20),atWar:false,army:20000+Math.floor(Math.random()*50000),population:50+Math.floor(Math.random()*200),cities:1+Math.floor(Math.random()*4),aggression:30+Math.floor(Math.random()*50),tradeAgreement:false,wartimeAlly:false,armyType:rand(['步兵','骑兵','弓兵']),generalName:rand(MALE_NAMES),generalAbility:50+Math.floor(Math.random()*20),wallLevel:1+Math.floor(Math.random()*2),foodReserve:3000+Math.floor(Math.random()*5000),isAlly:false});
+    });
+    var generals=[];
+    var generalNames=['于谦','徐达','戚继光','岳飞','韩世忠','吴玠','刘锜','俞大猷','常遇春','蓝玉'];
+    generalNames.forEach(function(name){
+        generals.push({name:name,command:50+Math.floor(Math.random()*40),force:50+Math.floor(Math.random()*40),wisdom:50+Math.floor(Math.random()*40),loyalty:70+Math.floor(Math.random()*20),experience:10,alive:true,injury:0,post:''});
+    });
+    return {
+        nationName:c.nationName||'魏国',eraName:c.eraName||'泰安',emperorTitle:c.emperorTitle||'魏太祖',emperorName:c.emperorName||'魏安',empressName:c.empressName||'沈青黛',capital:c.capital||'天城',startCity:c.startCity||'石城',difficulty:c.difficulty||'standard',
+        year:1,month:1,treasury:30000000,grain:100000,iron:5000,cloth:10000,medicine:2000,wood:8000,stone:5000,peopleSupport:60,administrationEfficiency:60,
+        population:4000,
+        army:{禁军:100000,边军:200000,府兵:300000,护国军:0,龙军:0,天军:0,地军:0,火军:0,水师:0},
+        armyMorale:60,armyPower:50,armyTraining:1,
+        harem:{total:314,members:harem,budget:5000,nannies:0,midwives:0,assignedNannies:{},assignedMidwives:{},perMemberBudget:{},loveCount:0},
+        monthlyActions:{},ongoingActions:[],courtSession:{active:false,issues:[],courtEnergy:5,issuesHandled:0},
+        officials:{内阁首辅:{name:'张廷玉',ability:85,loyalty:80,faction:'文官',integrity:90,age:55,experience:30,favor:50,morality:85,force:40,literature:80,wisdom:85,background:'科举',factionGroup:'文官党'},六部尚书:{吏部:{name:'李贤',ability:78,loyalty:75,faction:'文官',integrity:85,age:48,experience:20,favor:45,morality:80,force:40,literature:75,wisdom:78,background:'科举',factionGroup:'文官党'},户部:{name:'王恕',ability:72,loyalty:82,faction:'文官',integrity:88,age:52,experience:22,favor:48,morality:85,force:35,literature:72,wisdom:75,background:'科举',factionGroup:'文官党'},礼部:{name:'杨溥',ability:70,loyalty:78,faction:'文官',integrity:82,age:50,experience:18,favor:42,morality:80,force:35,literature:78,wisdom:72,background:'科举',factionGroup:'文官党'},兵部:{name:'于谦',ability:90,loyalty:85,faction:'武将',integrity:95,age:45,experience:25,favor:55,morality:95,force:65,literature:70,wisdom:88,background:'科举',factionGroup:'武将党'},刑部:{name:'海瑞',ability:75,loyalty:88,faction:'文官',integrity:98,age:49,experience:21,favor:50,morality:98,force:30,literature:70,wisdom:80,background:'举荐',factionGroup:'文官党'},工部:{name:'宋应星',ability:80,loyalty:72,faction:'文官',integrity:86,age:42,experience:15,favor:40,morality:82,force:35,literature:75,wisdom:85,background:'科举',factionGroup:'文官党'}}},
+        idleOfficials:[{name:'高拱',ability:70,faction:'文官',morality:70,force:40,literature:75,wisdom:72,background:'科举',factionGroup:'文官党'},{name:'张居正',ability:80,faction:'文官',morality:75,force:40,literature:80,wisdom:85,background:'科举',factionGroup:'文官党'},{name:'戚继光',ability:85,faction:'武将',morality:80,force:70,literature:60,wisdom:75,background:'军功',factionGroup:'武将党'},{name:'俞大猷',ability:78,faction:'武将',morality:78,force:68,literature:60,wisdom:72,background:'军功',factionGroup:'武将党'},{name:'徐阶',ability:72,faction:'文官',morality:72,force:35,literature:75,wisdom:74,background:'科举',factionGroup:'文官党'},{name:'袁崇焕',ability:82,faction:'武将',morality:78,force:65,literature:65,wisdom:75,background:'军功',factionGroup:'武将党'}],
+        provinces:provinces,
+        infrastructure:{道路:1,驿站:1,水利:1,农田:2,城墙:1,医所:1,学堂:1,市集:1,铁矿:0,盐场:0,织造局:0,瓷窑:0,铸钱局:0,军器监:0,孔庙:1,武庙:1,社稷坛:1,天坛:0,观象台:0,皇宫:1,佳丽宫:0,御花园:0,太庙:1},
+        cultivation:{unlocked:false,realm:'凡人',realmIndex:0,pills:[],beastCount:0,cultivationExp:0,cultivationMaxExp:100,method:'吐纳术',learnedMethods:['吐纳术'],specialPolicy:''},
+        spiritBeasts:[],achievements:[],achievementBonus:{taxRate:0},achievementLevels:{},dialogues:[],dialogueIdCounter:0,chronicle:[],logIdCounter:0,
+        factions:{文官:50,武将:50,宗室:50,外戚:50,宦官:45},prestige:55,destinyPoints:10,isProcessing:false,inCourt:false,gameOver:false,totalActionsThisMonth:0,examsHeld:0,
+        technology:{农业:0,军事:0,商业:0,文化:0,工业:0,医药:0},techResearchThisMonth:0,nearMinisters:[],
+        diplomacy:diplomacy,
+        armyTargets:diplomacy.map(function(d){return d.name;}),
+        generals:generals,
+        heirs:[],nationalPolicy:null,localSystem:'州县制',examCandidates:[],provinceEvents:[],emperorHealth:80,emperorHealthMax:100,emperorAge:25,investigations:[],atWarWith:[],activeExpeditions:0,warReports:[],monthlyDeficitCount:0,scouts:[],specialEvents:[],tradeAgreements:[],wartimeAllies:[],warPenaltyTurns:{},
+        courtRecords:[],secretReports:[],courtDebates:[],factionEvents:[],commerce:{市舶司:0,商路:0,盐引:0,茶马互市:0},grainStorage:{lastGrain:100000},armyEquipment:{禁军:0,边军:0,府兵:0,护国军:0,龙军:0,天军:0,地军:0,火军:0,水师:0},militaryPosts:{大将军:'',骠骑将军:'',车骑将军:'',卫将军:''},
+        consecutiveDiligentMonths:0,efficiencyBonusTurns:0,supportMilestones:[],buildStreak:0,courtDebateCostReduction:false
+    };
+}
+function selectNovice(novice){
+    noviceSelected=novice;
+    document.getElementById('btnNovice').classList.toggle('selected',novice);
+    document.getElementById('btnVeteran').classList.toggle('selected',!novice);
+    document.getElementById('noviceHint').textContent=novice?'新手模式':'老手模式';
+    document.getElementById('btnStart1').disabled=false;
+    document.getElementById('btnStart2').disabled=false;
+}
+function startNewGame(slot){
+    if(noviceSelected===null){document.getElementById('noviceHint').textContent='请先选择游戏经验！';return;}
+    var err=document.getElementById('startError');
+    var nation=document.getElementById('inpNation').value.trim();
+    var era=document.getElementById('inpEra').value.trim();
+    var title=document.getElementById('inpTitle').value.trim();
+    var emp=document.getElementById('inpEmperor').value.trim();
+    var empress=document.getElementById('inpEmpress').value.trim();
+    var capital=document.getElementById('inpCapital').value.trim();
+    var city=document.getElementById('inpCity').value.trim();
+    var diff=document.getElementById('inpDifficulty').value;
+    if(!validateInput(nation,2,4)){err.textContent='国号需2-4字';return;}
+    if(!validateInput(era,2,4)){err.textContent='年号需2-4字';return;}
+    if(!validateInput(title,2,6)){err.textContent='称号需2-6字';return;}
+    if(!validateInput(emp,2,8)){err.textContent='皇帝姓名需2-8字';return;}
+    if(!validateInput(empress,2,8)){err.textContent='皇后姓名需2-8字';return;}
+    if(!validateInput(capital,2,6)){err.textContent='国都需2-6字';return;}
+    if(!validateInput(city,2,6)){err.textContent='陪都需2-6字';return;}
+    err.textContent='';
+    gameState=createInitialState({nationName:nation,eraName:era,emperorTitle:title,emperorName:emp,empressName:empress,capital:capital,startCity:city,difficulty:diff});
+    // 硬核模式调整
+    if(diff==='hardcore'){
+        gameState.treasury=Math.floor(Number(gameState.treasury)*0.8);
+        gameState.grain=Math.floor(Number(gameState.grain)*0.8);
+        gameState.iron=Math.floor(Number(gameState.iron)*0.8);
+        gameState.population=Math.max(1,Math.floor(Number(gameState.population)*0.9));
+        gameState.diplomacy.forEach(function(d){d.aggression=clamp(Number(d.aggression)+10,0,100);});
+    }
+    currentSlot=slot;
+    addLog('🏛️ '+title+' '+emp+' 登基，国号'+nation,'system');
+    saveToSlot(slot);
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('gameScreen').classList.remove('hidden');
+    refreshUI();
+    showToast('🏛️ 王朝建立！','success');
+    if(noviceSelected === true){ showTutorial(); }
+}
+function continueGame(slot){
+    if(loadFromSlot(slot)){
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('gameScreen').classList.remove('hidden');
+        refreshUI();
+        showToast('📜 读档成功','success');
+    }else{ showToast('❌ 存档为空','danger'); }
+}
+function showStartScreen(){
+    document.getElementById('gameScreen').classList.add('hidden');
+    document.getElementById('startScreen').classList.remove('hidden');
+    updateSaveSlots();
+    document.getElementById('btnCont1').classList.toggle('hidden',!hasSaveSlot(1));
+    document.getElementById('btnCont2').classList.toggle('hidden',!hasSaveSlot(2));
+    document.getElementById('btnStart1').disabled=(noviceSelected===null);
+    document.getElementById('btnStart2').disabled=(noviceSelected===null);
+}
+function confirmReset(){showModal('🔄 重置','确定要重置吗？',[{label:'确认',danger:true,onclick:'Game._doReset()'},{label:'取消',onclick:'Game.closeModal()'}]);}
+function _doReset(){closeModal();localStorage.removeItem(getSaveKey(currentSlot));gameState=null;showStartScreen();showToast('已重置','danger');}
+function registerMonthlyAction(id){if(!gameState.monthlyActions[id]){gameState.monthlyActions[id]=true;gameState.totalActionsThisMonth++;return true;}return false;}
+function isActionUsed(id){return !!gameState.monthlyActions[id];}
+function resetMonthlyActions(){gameState.monthlyActions={};gameState.totalActionsThisMonth=0;gameState.techResearchThisMonth=0;gameState.harem.loveCount=0;}
+function performAction(actionId,params){
+    if(isProcessing||gameState.isProcessing)return;
+    isProcessing=true;gameState.isProcessing=true;
+    try{
+        var r=executeAction(actionId,params||{});
+        if(r&&r.message){addLog(r.message,r.type||'info');if(r.toast)showToast(r.toast,'success');}
+        checkAchievements();checkNearMinisters();checkGameOver();saveToSlot(currentSlot);refreshUI();
+    }catch(e){
+        console.error('操作出错：', e);
+        showToast('操作出错：'+e.message, 'danger');
+        addLog('⚠️ 操作失败：'+e.message, 'danger');
+    }
+    finally{isProcessing=false;gameState.isProcessing=false;}
+}
+function executeAction(actionId,params){
+    var s=gameState;
+    // 确保关键数字有效
+    s.treasury = Number(s.treasury)||0;
+    s.grain = Number(s.grain)||0;
+    s.iron = Number(s.iron)||0;
+    s.population = Number(s.population)||4000;
+    s.peopleSupport = Number(s.peopleSupport)||60;
+    s.administrationEfficiency = Number(s.administrationEfficiency)||60;
+    s.armyMorale = Number(s.armyMorale)||60;
+    s.armyPower = Number(s.armyPower)||50;
+    s.emperorHealth = Number(s.emperorHealth)||80;
+    s.prestige = Number(s.prestige)||55;
+    s.emperorHealthMax = Number(s.emperorHealthMax)||100;
+    var spendSilver=function(a){a=Number(a)||0;if(s.treasury<a)return false;s.treasury-=a;return true;};
+    var addSilver=function(a){s.treasury=Number(s.treasury)+Number(a||0);};
+    var spendGrain=function(a){a=Number(a)||0;if(s.grain<a)return false;s.grain-=a;return true;};
+    var spendIron=function(a){a=Number(a)||0;if(s.iron<a)return false;s.iron-=a;return true;};
+    var addIron=function(a){s.iron=clamp(Number(s.iron)+Number(a||0),0,999999);};
+    var chPrestige=function(d){s.prestige=clamp(Number(s.prestige)+d,0,100);};
+    var chMorale=function(d){s.armyMorale=clamp(Number(s.armyMorale)+d,0,100);};
+    var chFaction=function(f,d){s.factions[f]=clamp(Number(s.factions[f])+d,0,100);};
+    var chSupport=function(d){s.peopleSupport=clamp(Number(s.peopleSupport)+d,0,100);};
+    switch(actionId){
+        case '上朝':
+            if(s.inCourt)return{message:'已在朝会中',type:'info'};
+            if(isActionUsed('上朝'))return{message:'本月已上朝',type:'info'};
+            if(!registerMonthlyAction('上朝'))return{message:'本月已上朝',type:'info'};
+            s.inCourt=true;s.courtSession.active=true;s.courtSession.courtEnergy=5;s.courtSession.issuesHandled=0;
+            s.courtSession.issues=generateCourtIssues();
+            chPrestige(1);
+            return{message:'📯 朝会开始！'+s.courtSession.issues.length+'个议题',type:'success'};
+        case '处理议题':
+            var ii=params.issueIndex,oi=params.optionIndex;
+            if(!s.inCourt||!s.courtSession.active)return{message:'不在朝会中',type:'danger'};
+            if(s.courtSession.courtEnergy<=0)return{message:'精力耗尽',type:'danger'};
+            var issue=s.courtSession.issues[ii];
+            if(!issue||issue.handled)return{message:'已处理',type:'danger'};
+            var opt=issue.options[oi];
+            if(!opt)return{message:'选项错误',type:'danger'};
+            issue.handled=true;s.courtSession.courtEnergy-=1;s.courtSession.issuesHandled+=1;
+            if(opt.effects){
+                for(var ei=0;ei<opt.effects.length;ei++){
+                    var e=opt.effects[ei];
+                    if(e.type==='treasury')addSilver(e.value);
+                    else if(e.type==='prestige')chPrestige(e.value);
+                    else if(e.type==='faction')chFaction(e.faction,e.value);
+                    else if(e.type==='morale')chMorale(e.value);
+                    else if(e.type==='grain')s.grain=clamp(Number(s.grain)+e.value,0,999999999);
+                    else if(e.type==='iron')addIron(e.value);
+                    else if(e.type==='support')chSupport(e.value);
+                    else if(e.type==='army'){if(s.army[e.unit]!==undefined)s.army[e.unit]=Math.max(0,Number(s.army[e.unit])+e.value);}
+                    else if(e.type==='haremFavor'){s.harem.members.forEach(function(m){m.favor=clamp(Number(m.favor)+e.value,0,100);});}
+                    else if(e.type==='armyPower'){s.armyPower=clamp(Number(s.armyPower)+e.value,0,100);}
+                    else if(e.type==='population'){s.population=clamp(Number(s.population)+e.value,1,999999);}
+                    else if(e.type==='chain'){s.courtSession.chainEvent=e.value;}
+                }
+            }
+            // 正向评价
+            if(opt.effects){
+                var hasPositive=opt.effects.some(function(e){return (e.type==='prestige'&&e.value>0)||(e.type==='support'&&e.value>0);});
+                if(hasPositive){
+                    var praise=rand(['万民称颂','百官叹服','朝野欢腾','天下归心']);
+                    addLog('👏 '+praise+'！','success');
+                    if(Math.random()<0.3){s.treasury+=100000;addLog('📜 群臣上表称贺，奖励国库+10万两','success');}
+                }
+            }
+            var follow='';
+            if(s.courtSession.courtEnergy<=0){follow=' 精力耗尽，自动退朝';endCourtSession();}
+            var record={date:getDate(),issue:issue.title,choice:opt.label};
+            s.courtRecords.unshift(record);if(s.courtRecords.length>10)s.courtRecords.pop();
+            addLog('📋 处理议题：'+issue.title,'important');
+            return{message:'📋 '+opt.label+follow,type:'success'};
+        case '跳议题':
+            if(!s.inCourt)return{message:'不在朝会中',type:'danger'};
+            var si=params.issueIndex;
+            var issue2=s.courtSession.issues[si];
+            if(!issue2||issue2.handled)return{message:'已处理',type:'danger'};
+            if(issue2.required)return{message:'此议题必须处理！',type:'danger'};
+            issue2.handled=true;chPrestige(-1);
+            return{message:'⏭️ 跳过议题，声望-1',type:'info'};
+        case '退朝':
+            if(!s.inCourt)return{message:'不在朝会中',type:'danger'};
+            var unhandled=s.courtSession.issues.filter(function(i){return i.required&&!i.handled;});
+            if(unhandled.length>0)return{message:'仍有必须处理的议题！',type:'danger'};
+            // 全部处理完毕
+            var allHandled=s.courtSession.issues.every(function(i){return i.handled;});
+            if(allHandled){
+                s.consecutiveDiligentMonths=(Number(s.consecutiveDiligentMonths)||0)+1;
+            } else {
+                s.consecutiveDiligentMonths=0;
+            }
+            endCourtSession();
+            return{message:'📯 退朝。众大臣：吾皇万岁万岁万万岁！',type:'success'};
+        case '密奏调查':
+            if(s.secretReports.length>=3)return{message:'已有3起密奏调查',type:'danger'};
+            var offName=params.targetName||'';
+            if(!offName)return{message:'请选择调查对象',type:'danger'};
+            if(!spendSilver(300000))return{message:'❌ 国库不足30万两',type:'danger'};
+            s.secretReports.push({id:getId(),target:offName,remainingMonths:2,totalMonths:2,found:null});
+            return{message:'🕵️ 锦衣卫密奏调查启动（-30万两，2个月）',type:'success'};
+        case '处理密奏':
+            var srId=params.reportId;var decision=params.decision;
+            var sr=s.secretReports.find(function(x){return x.id===srId;});
+            if(!sr||sr.remainingMonths>0)return{message:'调查未完成',type:'danger'};
+            if(sr.found===null)return{message:'未获得罪证',type:'danger'};
+            var targetOff=null;
+            var allOffs=[s.officials.内阁首辅];
+            Object.keys(s.officials.六部尚书).forEach(function(k){allOffs.push(s.officials.六部尚书[k]);});
+            targetOff=allOffs.find(function(o){return o&&o.name===sr.target;});
+            if(!targetOff){targetOff={name:sr.target,loyalty:70,favor:50,ability:60,faction:'文官',morality:60,force:40,literature:60,wisdom:60};}
+            var msg='';
+            if(decision==='压下'){
+                if(!spendSilver(100000))return{message:'❌ 国库不足10万两',type:'danger'};
+                targetOff.favor=clamp(Number(targetOff.favor)+10,0,100);
+                targetOff.loyalty=clamp(Number(targetOff.loyalty)+10,0,100);
+                msg='🕵️ 密奏压下，'+sr.target+'感激，好感+10，忠诚+10（-10万两）';
+            }else if(decision==='警告'){
+                targetOff.favor=clamp(Number(targetOff.favor)-5,0,100);
+                targetOff.loyalty=clamp(Number(targetOff.loyalty)+5,0,100);
+                s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                msg='⚠️ 警告'+sr.target+'，忠诚+5，好感-5，仁君之名民心+1';
+            }else if(decision==='贬官'){
+                s.idleOfficials.push({name:sr.target,ability:(targetOff.ability||60),faction:targetOff.faction||'文官',morality:targetOff.morality||60,force:targetOff.force||40,literature:targetOff.literature||60,wisdom:targetOff.wisdom||60,background:'贬谪',factionGroup:'无'});
+                chPrestige(2);chFaction('文官',-3);
+                s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                msg='📉 贬官'+sr.target+'，声望+2，文官-3，仁君之名民心+1';
+            }else if(decision==='抄家'){
+                addSilver(5000000);chSupport(-2);chFaction(targetOff.faction||'文官',-5);
+                msg='💰 抄家'+sr.target+'，国库+500万，民心和派系受损';
+            }else if(decision==='处死'){
+                chPrestige(3);chSupport(-3);chFaction(targetOff.faction||'文官',-8);
+                msg='⚔️ 处死'+sr.target+'，声望+3，民心-3，该派系大震';
+            }
+            s.secretReports=s.secretReports.filter(function(x){return x.id!==srId;});
+            addLog(msg,'important');
+            return{message:msg,type:msg.indexOf('抄家')>=0?'success':'info'};
+        case '廷议':
+            var issueName=params.issueName||'';
+            var support=50+Math.floor(Math.random()*20);
+            var offs=[s.officials.内阁首辅];
+            Object.keys(s.officials.六部尚书).forEach(function(k){offs.push(s.officials.六部尚书[k]);});
+            offs.forEach(function(o){if(o){support+=Math.floor((Number(o.favor)-50)/10)+Math.floor((Number(o.loyalty)-70)/10);}});
+            support=clamp(support,0,100);
+            var result='';
+            if(support>=70){
+                result='廷议高票通过，支持率'+support+'%，君臣同心，本月政策成本降低10%！';
+                s.courtDebateCostReduction=true;
+            }else if(support>=40){
+                result='廷议勉强通过，支持率'+support+'%，成本增加10%。';
+            }else{
+                result='廷议未通过，支持率'+support+'%，声望-2。';chPrestige(-2);
+            }
+            s.courtDebates.push({date:getDate(),issue:issueName,support:support,result:result});
+            if(s.courtDebates.length>5)s.courtDebates.shift();
+            return{message:'🏛️ '+result,type:support>=40?'success':'danger'};
+        case '考核官员':
+            if(!registerMonthlyAction('考核官员'))return{message:'本月已考核',type:'info'};
+            if(!spendSilver(50000))return{message:'❌ 国库不足5万两',type:'danger'};
+            var goodOff=rand([s.officials.内阁首辅].concat(Object.values(s.officials.六部尚书)));
+            if(goodOff&&Math.random()>0.5){
+                goodOff.favor=clamp(Number(goodOff.favor)+10,0,100);
+                goodOff.experience=(Number(goodOff.experience)||10)+1;
+                s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+2,0,100);
+                s.efficiencyBonusTurns=2;
+                addLog('📋 考核：'+goodOff.name+'政绩突出，赏赐银两，官员好感+10，行政效率临时+2（持续2月）','success');
+            }else{
+                var badOff=rand([s.officials.内阁首辅].concat(Object.values(s.officials.六部尚书)));
+                if(badOff){badOff.favor=clamp(Number(badOff.favor)-5,0,100);badOff.integrity=clamp(Number(badOff.integrity)-3,0,100);addLog('⚠️ 考核：'+badOff.name+'被弹劾贪腐','danger');}
+            }
+            chPrestige(2);chFaction('文官',3);
+            return{message:'📋 考核百官（-5万两）：声望+2，文官+3',type:'success'};
+        case '开科取士':
+            if(s.ongoingActions.some(function(a){return a.type==='科举';}))return{message:'科举进行中',type:'info'};
+            if(!spendSilver(500000))return{message:'❌ 国库不足50万两',type:'danger'};
+            s.ongoingActions.push({id:getId(),type:'科举',name:'科举',remainingMonths:3,totalMonths:3});
+            chFaction('文官',5);
+            return{message:'📚 科举开考（-50万两，3个月）：文官+5',type:'success'};
+        case '留用人才':
+            var cid=params.candidateId;
+            var cand=s.examCandidates.find(function(c){return c.id===cid;});
+            if(!cand)return{message:'人才不存在',type:'danger'};
+            s.examCandidates=s.examCandidates.filter(function(c){return c.id!==cid;});
+            s.idleOfficials.push({name:cand.name,ability:cand.ability,faction:cand.faction,morality:60+Math.floor(Math.random()*30),force:40+Math.floor(Math.random()*30),literature:60+Math.floor(Math.random()*30),wisdom:60+Math.floor(Math.random()*30),background:'科举',factionGroup:''});
+            return{message:'👔 留用 '+cand.name+'，已进入闲置官员',type:'success'};
+        case '不留用人才':
+            var cid2=params.candidateId;
+            var cand2=s.examCandidates.find(function(c){return c.id===cid2;});
+            if(!cand2)return{message:'人才不存在',type:'danger'};
+            s.examCandidates=s.examCandidates.filter(function(c){return c.id!==cid2;});
+            return{message:'❌ 未留用 '+cand2.name+'，已放归',type:'info'};
+        case '官员调换':
+            var fromName=params.fromName;var toPost=params.toPost;
+            var fromOff=s.idleOfficials.find(function(o){return o.name===fromName;});
+            if(!fromOff)return{message:'闲置官员不存在',type:'danger'};
+            var targetOld=null;
+            if(toPost==='内阁首辅'){
+                targetOld=s.officials.内阁首辅;
+                s.officials.内阁首辅={name:fromOff.name,ability:fromOff.ability||60,loyalty:60,faction:fromOff.faction||'文官',integrity:70,age:30+Math.floor(Math.random()*20),experience:5,favor:40,morality:fromOff.morality||60,force:fromOff.force||40,literature:fromOff.literature||60,wisdom:fromOff.wisdom||60,background:fromOff.background||'调任',factionGroup:''};
+            }else if(s.officials.六部尚书[toPost]){
+                targetOld=s.officials.六部尚书[toPost];
+                s.officials.六部尚书[toPost]={name:fromOff.name,ability:fromOff.ability||60,loyalty:60,faction:fromOff.faction||'文官',integrity:70,age:30+Math.floor(Math.random()*20),experience:5,favor:40,morality:fromOff.morality||60,force:fromOff.force||40,literature:fromOff.literature||60,wisdom:fromOff.wisdom||60,background:fromOff.background||'调任',factionGroup:''};
+            }else{
+                return{message:'无效官职',type:'danger'};
+            }
+            s.idleOfficials=s.idleOfficials.filter(function(o){return o.name!==fromName;});
+            if(targetOld&&targetOld.name){
+                targetOld.loyalty=clamp(Number(targetOld.loyalty)-10,0,100);
+                s.idleOfficials.push({name:targetOld.name,ability:targetOld.ability||60,faction:targetOld.faction||'文官',morality:targetOld.morality||60,force:targetOld.force||40,literature:targetOld.literature||60,wisdom:targetOld.wisdom||60,background:'调任',factionGroup:''});
+                addLog('👔 '+targetOld.name+'被调离，忠诚-10','danger');
+            }
+            if(toPost==='礼部'&&(fromOff.literature||0)>=80){
+                s.officials.六部尚书.礼部.loyalty=clamp(Number(s.officials.六部尚书.礼部.loyalty)+5,0,100);
+                s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+1,0,100);
+                addLog('🎯 人尽其才，忠诚+5，行政效率+1','success');
+            }
+            addLog('👔 '+fromOff.name+' 调任'+toPost,'success');
+            return{message:'👔 调换完成',type:'success'};
+        case '扩军':
+            var unit=params.unit||'禁军',amount=params.amount||10000;
+            var costPer=(ARMY_TYPES[unit]||{cost:3}).cost;
+            var total=Number(amount)*costPer;
+            if(!spendSilver(total))return{message:'❌ 国库不足'+fmt(total)+'两',type:'danger'};
+            s.army[unit]=(Number(s.army[unit])||0)+Number(amount);
+            return{message:'⚔️ 扩军'+unit+'+'+fmt(amount)+'（-'+fmt(total)+'两）',type:'success'};
+        case '裁军':
+            var unitC=params.unit||'禁军',amountC=params.amount||10000;
+            if((Number(s.army[unitC])||0)<amountC)return{message:'❌ '+unitC+'不足',type:'danger'};
+            var costPerC=(ARMY_TYPES[unitC]||{cost:3}).cost;
+            var severance=Math.floor(amountC*costPerC*0.3);
+            if(!spendSilver(severance))return{message:'❌ 国库不足遣散费'+fmt(severance)+'两',type:'danger'};
+            s.army[unitC]-=amountC;
+            chMorale(-1);
+            if(amountC>=50000){
+                s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                addLog('🌾 轻徭薄赋，民心+1','success');
+            }
+            return{message:'📉 裁军'+unitC+'-'+fmt(amountC)+'（遣散费-'+fmt(severance)+'两，士气-1）',type:'success'};
+        case '军事训练':
+            if(!registerMonthlyAction('军事训练'))return{message:'本月已训练',type:'info'};
+            if(!spendSilver(500000))return{message:'❌ 国库不足50万两',type:'danger'};
+            chMorale(5);s.armyPower=clamp(Math.floor(Number(s.armyPower))+3,0,100);
+            return{message:'🏰 训练（-50万两）：士气+5，全军战力+3',type:'success'};
+        case '军械制造':
+            var eqType=params.equipType||'禁军';
+            if(!spendSilver(300000))return{message:'❌ 国库不足30万两',type:'danger'};
+            if(!spendIron(500))return{message:'❌ 铁矿不足500',type:'danger'};
+            s.armyEquipment[eqType]=(Number(s.armyEquipment[eqType])||0)+1;
+            chMorale(1);
+            addLog('🛡️ 军容壮盛，全军士气+1','success');
+            return{message:'🔧 '+eqType+'装备改良+1级（-30万两-500铁矿，士气+1）',type:'success'};
+        case '出征':
+            var target=params.target||'北狄',unit2=params.unit||'边军',amount2=params.amount||50000,general=params.general||'于谦',tactic2=params.tactic||'强攻';
+            var d=s.diplomacy.find(function(x){return x.name===target;});
+            if(!d)return{message:'目标不存在',type:'danger'};
+            var grainCost2=Math.floor(amount2/20),silverCost2=amount2*10;
+            if(tactic2==='围困'){grainCost2=Math.floor(grainCost2*1.5);silverCost2=Math.floor(silverCost2*1.2);}
+            else if(tactic2==='奇袭'){grainCost2=Math.floor(grainCost2*0.8);silverCost2=Math.floor(silverCost2*1.3);}
+            else if(tactic2==='诱敌'){grainCost2=Math.floor(grainCost2*0.9);silverCost2=Math.floor(silverCost2*1.1);}
+            else if(tactic2==='退守'){grainCost2=Math.floor(grainCost2*0.7);silverCost2=Math.floor(silverCost2*0.8);}
+            if(!spendSilver(silverCost2)||!spendGrain(grainCost2))return{message:'❌ 资源不足',type:'danger'};
+            if((Number(s.army[unit2])||0)<amount2)return{message:'❌ '+unit2+'不足',type:'danger'};
+            s.army[unit2]-=amount2;
+            s.activeExpeditions++;
+            d.atWar=true;
+            s.atWarWith.push(target);
+            s.ongoingActions.push({id:getId(),type:'出征',name:'出征'+target,remainingMonths:1,totalMonths:1,target:target,unit:unit2,amount:amount2,general:general,tactic:tactic2});
+            return{message:'⚔️ '+general+'率'+fmt(amount2)+unit2+'以'+tactic2+'战术出征'+target,type:'success'};
+        case '联合出征':
+            var targets=params.targets||[];var units2=params.units||[];var generals2=params.generals||[];var tactic=params.tactic||'强攻';
+            var totalAmt=0,totalCost=0,grainCostTotal=0,valid=true,details=[];
+            for(var i=0;i<units2.length;i++){
+                var uName=units2[i];
+                var amt=parseInt(params.amounts[i]||0);
+                if(!amt)continue;
+                if((Number(s.army[uName])||0)<amt){valid=false;break;}
+                var cp=(ARMY_TYPES[uName]||{cost:3}).cost;
+                totalCost+=amt*cp;
+                grainCostTotal+=Math.floor(amt/20);
+                totalAmt+=amt;
+                details.push({unit:uName,amount:amt});
+            }
+            if(!valid)return{message:'❌ 兵力不足',type:'danger'};
+            if(!spendSilver(totalCost)||!spendGrain(grainCostTotal))return{message:'❌ 资源不足',type:'danger'};
+            details.forEach(function(det){s.army[det.unit]-=det.amount;});
+            s.activeExpeditions++;
+            s.expeditionForces.push({id:getId(),targets:targets,units:details,generals:generals2,tactic:tactic,remainingMonths:1,totalMonths:1});
+            return{message:'⚔️ 联合出征：总兵力'+fmt(totalAmt)+'，花费'+fmt(totalCost)+'两+'+fmt(grainCostTotal)+'石粮',type:'success'};
+        case '侦查':
+            var d2=s.diplomacy.find(function(x){return x.name===params.target;});
+            if(!d2)return{message:'邻国不存在',type:'danger'};
+            if(!spendSilver(500000))return{message:'❌ 国库不足50万两',type:'danger'};
+            s.scouts.push({id:getId(),target:params.target,remainingMonths:3,totalMonths:3});
+            if(Math.random()<0.2){
+                d2.relation=clamp(Number(d2.relation)-5,0,100);
+                return{message:'🕵️ 侦查'+params.target+'（-50万两）被敌国发现，关系-5！',type:'danger'};
+            }
+            return{message:'🕵️ 侦查'+params.target+'（-50万两，3个月）',type:'success'};
+        case '加税':
+            if(!registerMonthlyAction('加税'))return{message:'本月已加税',type:'info'};
+            addSilver(3000000);chSupport(-15);
+            return{message:'📈 加税：国库+300万两，民心-15',type:'danger'};
+        case '减税':
+            if(!registerMonthlyAction('减税'))return{message:'本月已减税',type:'info'};
+            if(!spendSilver(2000000))return{message:'❌ 国库不足200万两',type:'danger'};
+            chSupport(9);
+            return{message:'📉 减税（-200万两）：民心+9',type:'success'};
+        case '赈灾':
+            if(!registerMonthlyAction('赈灾'))return{message:'本月已赈灾',type:'info'};
+            if(!spendSilver(3000000)||!spendGrain(20000))return{message:'❌ 资源不足',type:'danger'};
+            chSupport(10);
+            return{message:'🌾 赈灾：民心+10',type:'success'};
+        case '开矿':
+            if(!registerMonthlyAction('开矿'))return{message:'本月已开矿',type:'info'};
+            if(!spendSilver(1500000))return{message:'❌ 国库不足150万两',type:'danger'};
+            addSilver(2000000);addIron(2000);
+            return{message:'⛏️ 开矿：国库+200万两，铁矿+2000',type:'success'};
+        case '铸钱':
+            if(!registerMonthlyAction('铸钱'))return{message:'本月已铸钱',type:'info'};
+            if(!spendSilver(500000)||!spendIron(1000))return{message:'❌ 需银50万两、铁矿1000',type:'danger'};
+            addSilver(1500000);
+            return{message:'🪙 铸钱（-50万两-1000铁矿）：国库+150万两',type:'success'};
+        case '锦衣卫调查':
+            if(s.investigations.length>=3)return{message:'已有3起调查',type:'danger'};
+            if(!spendSilver(200000))return{message:'❌ 国库不足20万两',type:'danger'};
+            s.investigations.push({id:getId(),target:params.target||'某官员',remainingMonths:3,totalMonths:3,found:Math.random()<0.5});
+            return{message:'🕵️ 锦衣卫调查（-20万两，3个月）',type:'success'};
+        case '抄家':
+            var inv=s.investigations.find(function(i){return i.id===params.investigationId;});
+            if(!inv||inv.remainingMonths>0)return{message:'调查未完成',type:'danger'};
+            if(!inv.found)return{message:'未查到证据',type:'danger'};
+            addSilver(5000000);
+            s.investigations=s.investigations.filter(function(i){return i.id!==params.investigationId;});
+            return{message:'💰 抄家成功！国库+500万两',type:'success',toast:'💰 抄家+500万两！'};
+        case '临幸':
+            var m=s.harem.members.find(function(x){return x.id===params.memberId;});
+            if(!m)return{message:'未找到',type:'danger'};
+            if(m.pregnant)return{message:'已有身孕',type:'danger'};
+            if(s.harem.loveCount>=3)return{message:'本月已疲惫，不能再临幸',type:'danger'};
+            var preg=0.2;
+            if(m.rank==='皇后')preg=0.3;
+            else if(['贵妃','淑妃','德妃','贤妃'].indexOf(m.rank)>=0)preg=0.25;
+            m.favor=clamp(Number(m.favor)+3,0,100);
+            s.harem.loveCount+=1;
+            s.emperorHealth=clamp(Number(s.emperorHealth)-2,0,Number(s.emperorHealthMax)||100);
+            if(Math.random()<0.4){
+                m.favor=clamp(Number(m.favor)+1,0,100);
+                s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+1,0,100);
+                addLog('💞 君恩深厚，'+m.name+'宠爱额外+1，本月行政效率临时+1','success');
+            }
+            if(Math.random()<preg){
+                m.pregnant=true;m.pregnancyMonth=1;
+                return{message:'👑 临幸'+m.name+'，有孕！宠爱+3，健康-2',type:'success',toast:'🎉 '+m.name+'怀孕了！'};
+            }
+            return{message:'👑 临幸'+m.name+'，未孕，宠爱+3，健康-2',type:'info'};
+        case '选秀':
+            if(!registerMonthlyAction('选秀'))return{message:'本月已选秀',type:'info'};
+            if(!spendSilver(1000000))return{message:'❌ 国库不足100万两',type:'danger'};
+            var nn=rand(FEMALE_NAMES),nr=rand(['美人','才人','宝林']);
+            var family=rand(['平民','官宦','世家','商贾','武将','文臣']);
+            var personality=rand(['温婉','活泼','端庄','冷艳','心机','善良','高傲','柔顺']);
+            var newMember={id:getId(),name:nn,rank:nr,age:16+Math.floor(Math.random()*5),pregnant:false,pregnancyMonth:0,children:[],favor:20,hasNanny:false,hasMidwife:false,family:family,personality:personality,talent:rand(['琴','棋','书','画','舞','歌']),ambition:10+Math.floor(Math.random()*40),health:80+Math.floor(Math.random()*15),favorLevel:1};
+            s.harem.members.push(newMember);
+            var familyEffect=family==='世家'||family==='官宦'?'外戚+3':'后宫安稳';
+            chFaction('外戚',family==='世家'||family==='官宦'?3:0);
+            if(newMember.talent!=='无'||family==='世家'||family==='官宦'){
+                addSilver(100000);
+                addLog('🌸 得遇佳丽，国库+10万两','success');
+            }
+            return{message:'🌸 选秀：'+nn+'入宫（'+nr+'，'+family+'，'+familyEffect+'）',type:'success'};
+        case '宫宴':
+            if(!registerMonthlyAction('宫宴'))return{message:'本月已办',type:'info'};
+            if(!spendSilver(500000))return{message:'❌ 国库不足50万两',type:'danger'};
+            s.harem.members.forEach(function(x){x.favor=clamp(Number(x.favor)+3,0,100);});
+            if(s.harem.members.every(function(x){return x.favor>=50;})){
+                s.emperorHealth=clamp(Number(s.emperorHealth)+2,0,Number(s.emperorHealthMax)||100);
+                s.prestige=clamp(Number(s.prestige)+1,0,100);
+                addLog('🏮 后宫雍睦，健康+2，声望+1','success');
+            }
+            return{message:'🏮 宫宴：各妃嫔宠爱+3',type:'success'};
+        case '调后宫用度':
+            var amt=clamp(params.amount||5000,1000,50000);
+            s.harem.budget=amt;
+            var delta=amt>=10000?5:(amt>=5000?2:(amt>=2000?0:-3));
+            s.harem.members.forEach(function(x){x.favor=clamp(Number(x.favor)+delta,0,100);x.health=clamp(Number(x.health||80)+(amt>=10000?3:0),0,100);});
+            return{message:'💰 后宫用度调整为'+amt+'两/月，宠爱'+(delta>=0?'+':'')+delta,type:delta>=0?'success':'danger'};
+        case '一键分配奶妈':
+            var pregMembers=s.harem.members.filter(function(m){return m.pregnant&&!m.hasNanny;});
+            if(!pregMembers.length)return{message:'无需分配',type:'info'};
+            var assigned=0;
+            for(var pi=0;pi<pregMembers.length&&s.harem.nannies>0;pi++){pregMembers[pi].hasNanny=true;s.harem.nannies--;assigned++;}
+            return{message:'👩‍🍼 为'+assigned+'位怀孕佳丽分配奶妈',type:'success'};
+        case '一键分配接生婆':
+            var pregMembers2=s.harem.members.filter(function(m){return m.pregnant&&!m.hasMidwife;});
+            if(!pregMembers2.length)return{message:'无需分配',type:'info'};
+            var assigned2=0;
+            for(var pi2=0;pi2<pregMembers2.length&&s.harem.midwives>0;pi2++){pregMembers2[pi2].hasMidwife=true;s.harem.midwives--;assigned2++;}
+            return{message:'🤱 为'+assigned2+'位怀孕佳丽分配接生婆',type:'success'};
+        case '招募奶妈':
+            if(!spendSilver(100000))return{message:'❌ 国库不足10万两',type:'danger'};
+            s.harem.nannies+=1;
+            return{message:'👩‍🍼 招募奶妈（-10万两）',type:'success'};
+        case '招募接生婆':
+            if(!spendSilver(150000))return{message:'❌ 国库不足15万两',type:'danger'};
+            s.harem.midwives+=1;
+            return{message:'🤱 招募接生婆（-15万两）',type:'success'};
+        case '修改邻国关系':
+            var d3=s.diplomacy.find(function(x){return x.name===params.target;});
+            if(!d3)return{message:'邻国不存在',type:'danger'};
+            if(d3.atWar)return{message:'交战中只能求和',type:'danger'};
+            var amt2=params.amount||-5;
+            if(amt2<0){chPrestige(-2);d3.relation=clamp(Number(d3.relation)+amt2,0,100);return{message:'📉 与'+params.target+'关系'+amt2+'，声望-2',type:'danger'};}
+            if(!spendSilver(amt2*50000))return{message:'❌ 国库不足',type:'danger'};
+            d3.relation=clamp(Number(d3.relation)+amt2,0,100);
+            return{message:'🌏 与'+params.target+'关系+'+amt2,type:'success'};
+        case '求和':
+            var d4=s.diplomacy.find(function(x){return x.name===params.target;});
+            if(!d4||!d4.atWar)return{message:'未交战',type:'danger'};
+            if(!spendSilver(2000000))return{message:'❌ 国库不足200万两',type:'danger'};
+            d4.atWar=false;d4.relation=clamp(Number(d4.relation)+20,0,100);
+            s.atWarWith=s.atWarWith.filter(function(n){return n!==params.target;});
+            return{message:'🕊️ 议和（-200万两）：关系+20',type:'success'};
+        case '和亲':
+            var d6=s.diplomacy.find(function(x){return x.name===params.target;});
+            if(!d6)return{message:'邻国不存在',type:'danger'};
+            if(d6.atWar)return{message:'交战中',type:'danger'};
+            var daughters=s.heirs.filter(function(h){return h.gender==='皇女'&&h.age>=15;});
+            if(!daughters.length)return{message:'❌ 没有适龄皇女（≥15岁）',type:'danger'};
+            if(params.heirId){
+                var chosen=s.heirs.find(function(h){return h.id===params.heirId;});
+                if(!chosen||chosen.gender!=='皇女'||chosen.age<15)return{message:'无效的皇女',type:'danger'};
+                s.heirs=s.heirs.filter(function(h){return h.id!==chosen.id;});
+                chPrestige(3);d6.relation=clamp(Number(d6.relation)+20,0,100);chSupport(5);
+                addLog('💍 皇女'+chosen.name+'和亲'+d6.name+'！','important');
+                chSupport(2);
+                addLog('💑 秦晋之好，边境安宁，民心+2','success');
+                return{message:'💍 '+chosen.name+'和亲'+d6.name+'：关系+20，民心+5',type:'success'};
+            }
+            var opts='';
+            daughters.forEach(function(h){opts+='<button onclick="Game.performAction(\'和亲\',{target:\''+d6.name+'\',heirId:\''+h.id+'\'})">'+h.name+'（'+h.age+'岁）</button>';});
+            showModal('💍 选择和亲皇女','选择送哪位皇女去'+d6.name+'和亲：<br>'+opts,[{label:'取消',onclick:'Game.closeModal()'}]);
+            return{message:'请选择和亲皇女',type:'info'};
+        case '研究科技':
+            if(s.techResearchThisMonth>=2)return{message:'本月已达上限',type:'danger'};
+            var costs={农业:500000,军事:800000,商业:400000,文化:600000,工业:1000000,医药:700000};
+            var c=costs[params.tech];
+            if(!c)return{message:'科技不存在',type:'danger'};
+            if(!spendSilver(c))return{message:'❌ 国库不足',type:'danger'};
+            s.technology[params.tech]=(Number(s.technology[params.tech])||0)+1;
+            s.techResearchThisMonth++;
+            return{message:'🔬 研究'+params.tech+'：等级+1',type:'success'};
+        case '宴请大臣':
+            if(!registerMonthlyAction('宴请大臣'))return{message:'本月已宴请',type:'info'};
+            if(!spendSilver(300000))return{message:'❌ 国库不足30万两',type:'danger'};
+            var allOffs=[s.officials.内阁首辅];
+            Object.keys(s.officials.六部尚书).forEach(function(k){allOffs.push(s.officials.六部尚书[k]);});
+            allOffs.forEach(function(o){if(o)o.favor=clamp(Number(o.favor)+8,0,100);});
+            return{message:'🏮 宴请大臣：各官员好感+8',type:'success'};
+        case '颁布国策':
+            if(!spendSilver(params.cost||2000000))return{message:'❌ 国库不足',type:'danger'};
+            s.nationalPolicy={name:params.name||'休养生息',duration:params.duration||6,remainingMonths:params.duration||6,effect:params.effect||'',neg:params.neg||''};
+            return{message:'📜 国策「'+s.nationalPolicy.name+'」颁布',type:'success'};
+        case '设置地方制度':
+            s.localSystem=params.system||'州县制';
+            return{message:'🏙️ 地方制度设为「'+s.localSystem+'」',type:'success'};
+        case '把脉':
+            if(!registerMonthlyAction('把脉'))return{message:'本月已把脉',type:'info'};
+            if(!spendSilver(50000))return{message:'❌ 国库不足5万两',type:'danger'};
+            var heal1=5+Math.floor(Math.random()*5);
+            s.emperorHealth=clamp(Number(s.emperorHealth)+heal1,0,Number(s.emperorHealthMax)||100);
+            return{message:'👨‍⚕️ 把脉：健康+'+heal1,type:'success'};
+        case '吃药':
+            if(!registerMonthlyAction('吃药'))return{message:'本月已吃药',type:'info'};
+            if(!spendSilver(200000))return{message:'❌ 国库不足20万两',type:'danger'};
+            var heal2=12+Math.floor(Math.random()*8);
+            s.emperorHealth=clamp(Number(s.emperorHealth)+heal2,0,Number(s.emperorHealthMax)||100);
+            return{message:'💊 吃药：健康+'+heal2,type:'success'};
+        case '修炼':
+            if(!s.cultivation.unlocked)return{message:'修仙未解锁',type:'info'};
+            if(!registerMonthlyAction('修炼'))return{message:'本月已修炼',type:'info'};
+            var method=CULTIVATION_METHODS.find(function(x){return x.name===s.cultivation.method;})||CULTIVATION_METHODS[0];
+            var gain=Math.floor((10+Math.floor(Math.random()*15))*method.speed);
+            s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+gain;
+            var breakChance=method.breakRate;
+            if(s.cultivation.cultivationExp>=s.cultivation.cultivationMaxExp){
+                if(s.cultivation.realmIndex>=REALMS.length-1){
+                    s.cultivation.cultivationExp=s.cultivation.cultivationMaxExp;
+                    return{message:'🧘 已达最高境界，修为圆满',type:'success'};
+                }
+                if(Math.random()<breakChance+0.3){
+                    s.cultivation.cultivationExp-=s.cultivation.cultivationMaxExp;
+                    s.cultivation.realmIndex+=1;
+                    s.cultivation.realm=REALMS[s.cultivation.realmIndex];
+                    s.cultivation.cultivationMaxExp=Math.floor(s.cultivation.cultivationMaxExp*1.5);
+                    chPrestige(3);
+                    s.emperorHealth=clamp(Number(s.emperorHealth)+5,0,Number(s.emperorHealthMax)||100);
+                    if(s.cultivation.realmIndex===2){
+                        s.emperorHealth=clamp(Number(s.emperorHealth)+2,0,Number(s.emperorHealthMax)||100);
+                        addLog('🌱 天地异象，健康+2，本月行政效率+1','success');
+                    }else if(s.cultivation.realmIndex===4){
+                        addSilver(500000);chSupport(1);
+                        addLog('💎 金丹换骨，国库+50万，民心+1','success');
+                    }else if(s.cultivation.realmIndex>=6){
+                        if(Math.random()<0.5){
+                            var resource=rand(['treasury','grain','iron']);
+                            s[resource]=Math.floor(Number(s[resource])*1.2);
+                            addLog('🌈 仙人赐福，'+resource+'增加20%','success');
+                        }else{
+                            s.cultivation.specialPolicy='仙药救疫';
+                            addLog('🧪 解锁特殊政令：仙药救疫','success');
+                        }
+                    }
+                    return{message:'🧘 修炼突破至'+s.cultivation.realm+'！声望+3，健康+5',type:'success',toast:'🎉 突破至'+s.cultivation.realm+'！'};
+                }else{
+                    return{message:'🧘 突破失败，修为保留，继续修炼',type:'info'};
+                }
+            }
+            return{message:'🧘 修炼获得'+gain+'修为，当前修为'+s.cultivation.cultivationExp+'/'+s.cultivation.cultivationMaxExp,type:'success'};
+        case '炼丹':
+            if(!s.cultivation.unlocked)return{message:'修仙未解锁',type:'info'};
+            if(!registerMonthlyAction('炼丹'))return{message:'本月已炼丹',type:'info'};
+            if(!spendSilver(1000000))return{message:'❌ 国库不足100万两',type:'danger'};
+            if(Math.random()<0.2){return{message:'💥 炼丹失败！材料尽毁',type:'danger'};}
+            var quality=rand(['下品','中品','上品','极品']);
+            s.cultivation.pills.push({name:'灵丹',quality:quality});
+            if(quality==='上品'||quality==='极品'){
+                s.emperorHealth=clamp(Number(s.emperorHealth)+5,0,Number(s.emperorHealthMax)||100);
+                addLog('💊 丹成九转，健康+5','success');
+            }
+            return{message:'💊 炼丹：获得'+quality+'灵丹',type:'success'};
+        case '服用丹药':
+            var pillIdx=params.pillIndex;
+            if(!s.cultivation.pills||!s.cultivation.pills[pillIdx])return{message:'丹药不存在',type:'danger'};
+            var pill=s.cultivation.pills[pillIdx];
+            var pillGain={下品:20,中品:40,上品:80,极品:150}[pill.quality]||20;
+            s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+pillGain;
+            if(pill.quality==='上品'||pill.quality==='极品'){
+                s.emperorHealth=clamp(Number(s.emperorHealth)+5,0,Number(s.emperorHealthMax)||100);
+                addLog('💊 丹成九转，健康+5','success');
+            }
+            s.cultivation.pills.splice(pillIdx,1);
+            return{message:'💊 服用'+pill.quality+'灵丹，修为+'+pillGain,type:'success'};
+        case '学习功法':
+            var methodName=params.methodName;
+            var mth=CULTIVATION_METHODS.find(function(x){return x.name===methodName;});
+            if(!mth)return{message:'功法不存在',type:'danger'};
+            if(!spendSilver(3000000))return{message:'❌ 国库不足300万两',type:'danger'};
+            if(s.cultivation.learnedMethods.indexOf(methodName)>=0){
+                s.cultivation.method=methodName;
+                return{message:'📜 切换功法为'+methodName,type:'success'};
+            }
+            s.cultivation.learnedMethods.push(methodName);
+            s.cultivation.method=methodName;
+            return{message:'📜 学习功法'+methodName+'（-300万两）',type:'success'};
+        case '驯养灵兽':
+            if(!s.cultivation.unlocked)return{message:'修仙未解锁',type:'info'};
+            if(!registerMonthlyAction('驯养灵兽'))return{message:'本月已驯养',type:'info'};
+            if(!spendSilver(2000000))return{message:'❌ 国库不足200万两',type:'danger'};
+            var bn=rand(['青鳞兽','白羽鹤','海东青','巨龟','鲛人','灵虎']);
+            var bonus={青鳞兽:'侦察+1',白羽鹤:'传讯+1',海东青:'侦察+2',巨龟:'运输+2',鲛人:'水战+2',灵虎:'士气+5'}[bn]||'辅助';
+            s.spiritBeasts.push({id:getId(),name:bn,type:bn,level:1,desc:getBeastDesc(bn),bonus:bonus});
+            if(bn==='灵虎')chMorale(5);
+            return{message:'🐉 驯养灵兽：获得'+bn+'，'+bonus,type:'success'};
+        case '巡视州府':
+            if(!registerMonthlyAction('巡视州府'))return{message:'本月已巡视',type:'info'};
+            if(!spendSilver(100000))return{message:'❌ 国库不足10万两',type:'danger'};
+            var prov=s.provinces.find(function(p){return p.id===params.provinceId;});
+            if(!prov)return{message:'州府不存在',type:'danger'};
+            prov.citizenry=clamp(Number(prov.citizenry)+3,0,100);
+            chSupport(2);
+            return{message:'🏙️ 巡视：民心+2',type:'success'};
+        case '州府加税':
+            if(!registerMonthlyAction('州府加税'))return{message:'本月已调税',type:'info'};
+            var provTax=s.provinces.find(function(p){return p.id===params.provinceId;});
+            if(!provTax)return{message:'州府不存在',type:'danger'};
+            provTax.citizenry=clamp(Number(provTax.citizenry)-5,0,100);
+            addSilver(Number(provTax.tax));
+            return{message:'📈 加税：+'+fmt(provTax.tax)+'两，民心-5',type:'danger'};
+        case '州府减税':
+            if(!registerMonthlyAction('州府减税'))return{message:'本月已调税',type:'info'};
+            var provCut=s.provinces.find(function(p){return p.id===params.provinceId;});
+            if(!provCut)return{message:'州府不存在',type:'danger'};
+            provCut.citizenry=clamp(Number(provCut.citizenry)+5,0,100);
+            return{message:'📉 减税：民心+5',type:'success'};
+        case '建造':
+            var defs=getBuildDefinitions();
+            var bd=defs[params.buildType];
+            if(!bd)return{message:'未知建筑',type:'danger'};
+            if(!spendSilver(bd.cost))return{message:'❌ 国库不足'+fmt(bd.cost)+'两',type:'danger'};
+            s.ongoingActions.push({id:getId(),type:'建造',name:'建造'+bd.name,remainingMonths:bd.months,totalMonths:bd.months,data:params.buildType});
+            return{message:'🔨 建造'+bd.name+'（-'+fmt(bd.cost)+'两）',type:'success'};
+        case '遣使':
+            var d5=s.diplomacy.find(function(x){return x.name===params.target;});
+            if(!d5)return{message:'邻国不存在',type:'danger'};
+            if(d5.atWar)return{message:'交战中',type:'danger'};
+            if(!spendSilver(500000))return{message:'❌ 国库不足50万两',type:'danger'};
+            d5.relation=clamp(Number(d5.relation)+5,0,100);
+            if(!d5.tradeAgreement&&d5.relation>=60){
+                d5.tradeAgreement=true;
+                s.tradeAgreements.push(d5.name);
+                addSilver(100000);
+                addLog('🤝 与'+d5.name+'达成贸易往来！经济增长+5%，商路开通额外+10万两','success');
+            }
+            return{message:'📨 遣使：关系+5'+(d5.tradeAgreement?'，贸易往来达成':''),type:'success'};
+        case '培养子嗣':
+            var heir=s.heirs.find(function(h){return h.id===params.heirId;});
+            if(!heir)return{message:'子嗣不存在',type:'danger'};
+            if(!spendSilver(50000))return{message:'❌ 国库不足5万两',type:'danger'};
+            heir.abilities.武力=clamp(Number(heir.abilities.武力)+2,0,100);
+            heir.abilities.智力=clamp(Number(heir.abilities.智力)+2,0,100);
+            if(Math.random()<0.3){
+                s.emperorHealth=clamp(Number(s.emperorHealth)+1,0,Number(s.emperorHealthMax)||100);
+                addLog('👶 孺子可教，皇帝心情愉悦，健康+1','success');
+            }
+            return{message:'👶 培养：武+2，智+2',type:'success'};
+        default:
+            return{message:'未知操作',type:'info'};
+    }
+}
+function getBeastDesc(name){
+    var d={青鳞兽:'侦察巡逻',白羽鹤:'传讯侦察',海东青:'空中侦察',巨龟:'近海运输',鲛人:'浅水导航',灵虎:'提升士气'};
+    return d[name]||'辅助作战';
+}
+function getBuildDefinitions(){
+    return{
+        农田:{name:'农田',cat:'农业',cost:300000,months:2,desc:'粮产+5%'},
+        灌溉渠:{name:'灌溉渠',cat:'农业',cost:500000,months:3,desc:'农田+8%'},
+        堤防:{name:'堤防',cat:'农业',cost:800000,months:4,desc:'水灾-20%'},
+        官道:{name:'官道',cat:'交通',cost:400000,months:2,desc:'商贸+5%'},
+        桥梁:{name:'桥梁',cat:'交通',cost:300000,months:2,desc:'商贸+3%'},
+        驿站:{name:'驿站',cat:'交通',cost:200000,months:1,desc:'政令+10%'},
+        运河:{name:'运河',cat:'交通',cost:3000000,months:8,desc:'商贸+25%'},
+        城墙:{name:'城墙',cat:'军事',cost:1000000,months:4,desc:'城防+15%'},
+        烽燧:{name:'烽燧',cat:'军事',cost:500000,months:2,desc:'预警+30%'},
+        马场:{name:'马场',cat:'军事',cost:1500000,months:4,desc:'骑兵+20%'},
+        武备库:{name:'武备库',cat:'军事',cost:800000,months:3,desc:'军械-15%'},
+        惠民药局:{name:'惠民药局',cat:'民生',cost:600000,months:2,desc:'疫情-20%'},
+        义仓:{name:'义仓',cat:'民生',cost:400000,months:2,desc:'灾年赈济'},
+        养济院:{name:'养济院',cat:'民生',cost:300000,months:2,desc:'孤寡+10%'},
+        学堂:{name:'学堂',cat:'民生',cost:500000,months:3,desc:'人才+10%'},
+        书院:{name:'书院',cat:'民生',cost:800000,months:4,desc:'高级人才+15%'},
+        市集:{name:'市集',cat:'民生',cost:300000,months:1,desc:'商税+5%'},
+        铁矿:{name:'铁矿',cat:'工业',cost:1200000,months:4,desc:'铁矿+20%'},
+        盐场:{name:'盐场',cat:'工业',cost:1500000,months:4,desc:'盐税+25%'},
+        织造局:{name:'织造局',cat:'工业',cost:800000,months:3,desc:'布+15%'},
+        铸钱局:{name:'铸钱局',cat:'工业',cost:1000000,months:3,desc:'货币+10%'},
+        军器监:{name:'军器监',cat:'工业',cost:1200000,months:4,desc:'军械+20%'},
+        孔庙:{name:'孔庙',cat:'文化',cost:700000,months:3,desc:'文官+5'},
+        武庙:{name:'武庙',cat:'文化',cost:700000,months:3,desc:'武将+5'},
+        社稷坛:{name:'社稷坛',cat:'文化',cost:1000000,months:4,desc:'声望+3'},
+        天坛:{name:'天坛',cat:'文化',cost:2000000,months:6,desc:'天灾-20%'},
+        观象台:{name:'观象台',cat:'文化',cost:1500000,months:5,desc:'天文+15%'},
+        皇宫扩建:{name:'皇宫扩建',cat:'宫室',cost:5000000,months:10,desc:'权威+5'},
+        佳丽宫:{name:'佳丽宫',cat:'宫室',cost:3000000,months:6,desc:'后宫+30'},
+        御花园:{name:'御花园',cat:'宫室',cost:1000000,months:3,desc:'满意度+10%'},
+        太庙:{name:'太庙',cat:'宫室',cost:800000,months:3,desc:'宗室+5'}
+    };
+}
+function generateCourtIssues(){
+    var issues=[];
+    var issuePool=[
+        {title:'北方游牧犯边',category:'军事',required:true,options:[{label:'增派边军（-50万两，边军+2万）',effects:[{type:'treasury',value:-500000},{type:'army',unit:'边军',value:20000}]},{label:'和亲安抚（需皇女≥15岁）',effects:[{type:'prestige',value:1}]},{label:'坚守不战（士气+3）',effects:[{type:'morale',value:3}]}]},
+        {title:'多地流民四起',category:'民生',required:true,options:[{label:'开仓赈灾（-200万两，民心+5）',effects:[{type:'treasury',value:-2000000},{type:'support',value:5}]},{label:'镇压流民（民心-3）',effects:[{type:'support',value:-3}]}]},
+        {title:'官员贪腐案',category:'人事',required:false,options:[{label:'严惩（声望+3，文官-2）',effects:[{type:'prestige',value:3},{type:'faction',faction:'文官',value:-2}]},{label:'从轻（文官+3，声望-2）',effects:[{type:'faction',faction:'文官',value:3},{type:'prestige',value:-2}]}]},
+        {title:'边关互市',category:'外交',required:false,options:[{label:'开放（国库+150万，民心+2）',effects:[{type:'treasury',value:1500000},{type:'support',value:2}]},{label:'闭关（边境稳定+3）',effects:[{type:'prestige',value:1}]}]},
+        {title:'后宫用度',category:'礼法',required:false,options:[{label:'增加（-50万，后宫宠爱+3）',effects:[{type:'treasury',value:-500000},{type:'haremFavor',value:3}]},{label:'维持（无变化）',effects:[]}]},
+        {title:'边防工事',category:'军事',required:false,options:[{label:'修缮（-80万，战力+3）',effects:[{type:'treasury',value:-800000},{type:'armyPower',value:3}]},{label:'暂缓（士气+1）',effects:[{type:'morale',value:1}]}]},
+        {title:'水利兴修',category:'经济',required:false,options:[{label:'兴修（-100万，粮储+5000）',effects:[{type:'treasury',value:-1000000},{type:'grain',value:5000}]},{label:'暂缓（声望+1）',effects:[{type:'prestige',value:1}]}]},
+        {title:'藩王请求封地',category:'礼法',required:false,options:[{label:'拒绝（宗室-5，声望+2）',effects:[{type:'faction',faction:'宗室',value:-5},{type:'prestige',value:2}]},{label:'同意（宗室+5，税收-5%）',effects:[{type:'faction',faction:'宗室',value:5}]}]},
+        {title:'边将请求增兵',category:'军事',required:false,options:[{label:'增兵（-30万，武将+3）',effects:[{type:'treasury',value:-300000},{type:'faction',faction:'武将',value:3}]},{label:'拒绝（武将-3）',effects:[{type:'faction',faction:'武将',value:-3}]}]},
+        {title:'商人请求减税',category:'经济',required:false,options:[{label:'减税（国库-100万，民心+3）',effects:[{type:'treasury',value:-1000000},{type:'support',value:3}]},{label:'拒绝（国库+100万，民心-3）',effects:[{type:'treasury',value:1000000},{type:'support',value:-3}]}]},
+        {title:'农民请求减租',category:'经济',required:false,options:[{label:'减租（民心+5，国库-50万）',effects:[{type:'support',value:5},{type:'treasury',value:-500000}]},{label:'拒绝（民心-3）',effects:[{type:'support',value:-3}]}]},
+        {title:'学者请求修书',category:'文化',required:false,options:[{label:'拨款（-200万，文官+5）',effects:[{type:'treasury',value:-2000000},{type:'faction',faction:'文官',value:5}]},{label:'拒绝（声望-2）',effects:[{type:'prestige',value:-2}]}]},
+        {title:'武将请求比武',category:'军事',required:false,options:[{label:'举办（-50万，武将+5，士气+5）',effects:[{type:'treasury',value:-500000},{type:'faction',faction:'武将',value:5},{type:'morale',value:5}]},{label:'拒绝（武将-3）',effects:[{type:'faction',faction:'武将',value:-3}]}]},
+        {title:'妃嫔请求省亲',category:'礼法',required:false,options:[{label:'恩准（后宫宠爱+3）',effects:[{type:'haremFavor',value:3}]},{label:'不准（后宫宠爱-3）',effects:[{type:'haremFavor',value:-3}]}]},
+        {title:'太监请求加俸',category:'人事',required:false,options:[{label:'加俸（-20万，宦官+5）',effects:[{type:'treasury',value:-200000},{type:'faction',faction:'宦官',value:5}]},{label:'拒绝（宦官-5）',effects:[{type:'faction',faction:'宦官',value:-5}]}]},
+        {title:'官员请求致仕',category:'人事',required:false,options:[{label:'批准（文官-2，声望+2）',effects:[{type:'faction',faction:'文官',value:-2},{type:'prestige',value:2}]},{label:'挽留（文官+3，国库-30万）',effects:[{type:'faction',faction:'文官',value:3},{type:'treasury',value:-300000}]}]},
+        {title:'边疆互市',category:'外交',required:false,options:[{label:'开放（国库+200万，民心+2）',effects:[{type:'treasury',value:2000000},{type:'support',value:2}]},{label:'关闭（边境+3，民心-2）',effects:[{type:'prestige',value:2},{type:'support',value:-2}]}]},
+        {title:'河道治理',category:'经济',required:false,options:[{label:'拨款（-300万，民心+5）',effects:[{type:'treasury',value:-3000000},{type:'support',value:5}]},{label:'暂缓（水灾风险+）',effects:[{type:'prestige',value:-1}]}]},
+        {title:'盐铁专卖',category:'经济',required:false,options:[{label:'实行（国库+300万，民心-5）',effects:[{type:'treasury',value:3000000},{type:'support',value:-5}]},{label:'不实行（民心+2）',effects:[{type:'support',value:2}]}]},
+        {title:'科举舞弊案',category:'人事',required:false,options:[{label:'严查（文官-3，声望+5）',effects:[{type:'faction',faction:'文官',value:-3},{type:'prestige',value:5}]},{label:'掩盖（文官+3，声望-5）',effects:[{type:'faction',faction:'文官',value:3},{type:'prestige',value:-5}]}]},
+        {title:'盗贼四起',category:'民生',required:false,options:[{label:'剿灭（-100万，治安+10）',effects:[{type:'treasury',value:-1000000},{type:'prestige',value:2}]},{label:'安抚（民心+3）',effects:[{type:'support',value:3}]}]},
+        {title:'外国使节来访',category:'外交',required:false,options:[{label:'接待（-150万，声望+5）',effects:[{type:'treasury',value:-1500000},{type:'prestige',value:5}]},{label:'婉拒（声望-2）',effects:[{type:'prestige',value:-2}]}]},
+        {title:'瘟疫蔓延',category:'灾异',required:false,options:[{label:'派医官（-100万，疫情-10）',effects:[{type:'treasury',value:-1000000},{type:'support',value:3}]},{label:'隔离封锁（民心-5）',effects:[{type:'support',value:-5}]}]},
+        {title:'蝗灾肆虐',category:'灾异',required:false,options:[{label:'灭蝗（-80万，粮储-5000）',effects:[{type:'treasury',value:-800000},{type:'grain',value:-5000}]},{label:'祈神（民心-3）',effects:[{type:'support',value:-3}]}]},
+        {title:'边境贸易纠纷',category:'外交',required:false,options:[{label:'派使调解（-30万，关系+3）',effects:[{type:'treasury',value:-300000},{type:'prestige',value:1}]},{label:'武力威胁（关系-5，武将+3）',effects:[{type:'faction',faction:'武将',value:3},{type:'prestige',value:-1}]}]},
+        {title:'后宫失窃案',category:'礼法',required:false,options:[{label:'严查（后宫宠爱-5，声望+2）',effects:[{type:'haremFavor',value:-5},{type:'prestige',value:2}]},{label:'低调处理（后宫宠爱+2）',effects:[{type:'haremFavor',value:2}]}]},
+        {title:'天降陨石',category:'灾异',required:false,options:[{label:'祭祀（-50万，民心+3）',effects:[{type:'treasury',value:-500000},{type:'support',value:3}]},{label:'不理会（民心-3）',effects:[{type:'support',value:-3}]}]},
+        {title:'武将私斗',category:'军事',required:false,options:[{label:'严惩（武将-5，声望+2）',effects:[{type:'faction',faction:'武将',value:-5},{type:'prestige',value:2}]},{label:'调解（武将+3，士气-2）',effects:[{type:'faction',faction:'武将',value:3},{type:'morale',value:-2}]}]},
+        {title:'皇商请求专营',category:'经济',required:false,options:[{label:'批准（国库+150万，商业+5）',effects:[{type:'treasury',value:1500000},{type:'faction',faction:'文官',value:2}]},{label:'驳回（声望+2，商业-2）',effects:[{type:'prestige',value:2},{type:'treasury',value:-500000}]}]},
+        {title:'边民请求内迁',category:'民生',required:false,options:[{label:'允许（边境人口+10万，粮储-5000）',effects:[{type:'grain',value:-5000},{type:'population',value:10}]},{label:'拒绝（边境民心-3）',effects:[{type:'support',value:-3}]}]},
+        {title:'新式农具推广',category:'经济',required:false,options:[{label:'推广（-80万，粮产+10%）',effects:[{type:'treasury',value:-800000},{type:'grain',value:8000}]},{label:'观望（无变化）',effects:[]}]},
+        {title:'海防告急',category:'军事',required:false,options:[{label:'加强海防（-200万，水师+2万）',effects:[{type:'treasury',value:-2000000},{type:'army',unit:'水师',value:20000}]},{label:'暂缓（沿海民心-5）',effects:[{type:'support',value:-5}]}]},
+        {title:'西域使团求经',category:'外交',required:false,options:[{label:'赐经（-30万，声望+5）',effects:[{type:'treasury',value:-300000},{type:'prestige',value:5}]},{label:'拒绝（声望-1）',effects:[{type:'prestige',value:-1}]}]},
+        {title:'彻查贪腐',category:'人事',required:false,options:[{label:'启动彻查（-100万，可能引发连锁）',effects:[{type:'treasury',value:-1000000},{type:'chain',value:'贪腐彻查'}]},{label:'压下（文官+2，声望-1）',effects:[{type:'faction',faction:'文官',value:2},{type:'prestige',value:-1}]}]},
+        {title:'开战廷议',category:'军事',required:false,options:[{label:'廷议开战（声望+1）',effects:[{type:'prestige',value:1}]},{label:'暂缓（武将-2）',effects:[{type:'faction',faction:'武将',value:-2}]}]}
+    ];
+    var shuffled=issuePool.sort(function(){return Math.random()-0.5;});
+    var count=5+Math.floor(Math.random()*3);
+    for(var i=0;i<count&&i<shuffled.length;i++){
+        var iss=shuffled[i];
+        iss.handled=false;
+        issues.push(iss);
+    }
+    return issues;
+}
+function endCourtSession(){var s=gameState;s.inCourt=false;s.courtSession.active=false;s.courtSession.issues=[];addLog('📯 退朝','important');addDialogue('众大臣','吾皇万岁万岁万万岁！');}
+function checkAchievements(){
+    var s=gameState;
+    var ex=s.achievements.map(function(a){return a.id;});
+    var add=function(id,name,desc,bonus){
+        if(ex.indexOf(id)<0){
+            s.achievements.push({id:id,name:name,unlockedAt:getDate(),desc:desc||''});
+            addLog('🏆 成就：'+name+'！'+(desc?' '+desc:''),'important');
+            showToast('🏆 成就：'+name+'！','success');
+            var rewardMap={
+                'founder':'声望+5','harem500':'国库+100万','rich':'税收+2%','immortal':'修为+50',
+                'beast_master':'国库+200万','army_power':'士气+5','support':'民心+2','iron':'铁矿+5000',
+                'admin':'行政效率+2','spy':'国库+100万','court':'声望+2',
+                'province12':'声望+3','province20':'声望+5','spy5':'国库+200万','court20':'声望+3',
+                'heirs10':'后宫全体宠爱+2','beast3':'国库+100万','realm6':'修为+100','realm10':'声望+5',
+                'rich500':'税收+3%','morale90':'士气+3','eff95':'行政效率+1','eunuch80':'警告：宦官势大','waqi80':'警告：外戚势大','near_death':'健康+10'
+            };
+            if(rewardMap[id]){
+                var reward=rewardMap[id];
+                if(reward==='声望+5') s.prestige=clamp(Number(s.prestige)+5,0,100);
+                else if(reward==='声望+3') s.prestige=clamp(Number(s.prestige)+3,0,100);
+                else if(reward==='声望+2') s.prestige=clamp(Number(s.prestige)+2,0,100);
+                else if(reward==='国库+100万') s.treasury+=1000000;
+                else if(reward==='国库+200万') s.treasury+=2000000;
+                else if(reward==='税收+2%') s.achievementBonus.taxRate=(Number(s.achievementBonus.taxRate)||0)+0.02;
+                else if(reward==='税收+3%') s.achievementBonus.taxRate=(Number(s.achievementBonus.taxRate)||0)+0.03;
+                else if(reward==='修为+50') s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+50;
+                else if(reward==='修为+100') s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+100;
+                else if(reward==='士气+5') s.armyMorale=clamp(Number(s.armyMorale)+5,0,100);
+                else if(reward==='士气+3') s.armyMorale=clamp(Number(s.armyMorale)+3,0,100);
+                else if(reward==='民心+2') s.peopleSupport=clamp(Number(s.peopleSupport)+2,0,100);
+                else if(reward==='铁矿+5000') s.iron=clamp(Number(s.iron)+5000,0,999999);
+                else if(reward==='行政效率+2') s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+2,0,100);
+                else if(reward==='行政效率+1') s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+1,0,100);
+                else if(reward==='后宫全体宠爱+2') s.harem.members.forEach(function(m){m.favor=clamp(Number(m.favor)+2,0,100);});
+                else if(reward==='健康+10') s.emperorHealth=clamp(Number(s.emperorHealth)+10,0,Number(s.emperorHealthMax)||100);
+                addLog('🎁 成就奖励：'+reward,'success');
+            }
+        }
+    };
+    add('founder','开国之君');
+    if(s.harem.total>=500)add('harem500','后宫佳丽');
+    if(s.treasury>=100000000)add('rich','富可敌国');
+    if(s.cultivation.unlocked)add('immortal','仙途初启');
+    if(s.spiritBeasts.length>=5)add('beast_master','灵兽之主');
+    if(s.armyPower>=80)add('army_power','强军劲旅');
+    if(s.peopleSupport>=80)add('support','民心所向');
+    if(s.iron>=50000)add('iron','铁矿丰富');
+    if(s.administrationEfficiency>=90)add('admin','高效行政');
+    if(s.secretReports.length>0)add('spy','密奏之主');
+    if(s.courtRecords.length>=10)add('court','勤政之君');
+    if(s.provinces.length>=12)add('province12','开疆拓土','州府达到12座');
+    if(s.provinces.length>=20)add('province20','一统天下','州府达到20座');
+    if(s.secretReports.length>=5)add('spy5','密奏之主','发起5次密奏调查');
+    if(s.courtRecords.length>=20)add('court20','勤政之君','处理20次朝会');
+    if(s.heirs.length>=10)add('heirs10','十子登科','拥有10名子嗣');
+    if(s.spiritBeasts.length>=3)add('beast3','灵兽成群','拥有3只灵兽');
+    if(s.cultivation.realmIndex>=6)add('realm6','仙道大成','达到化神境界');
+    if(s.cultivation.realmIndex>=10)add('realm10','飞升之境','达到帝级境界');
+    if(s.treasury>=500000000)add('rich500','富甲天下','国库达到5亿两');
+    if(s.armyMorale>=90)add('morale90','士气如虹','士气达到90');
+    if(s.administrationEfficiency>=95)add('eff95','高效王朝','行政效率达到95');
+    if(s.factions.宦官>=80)add('eunuch80','宦官专权','宦官势力达到80');
+    if(s.factions.外戚>=80)add('waqi80','外戚干政','外戚势力达到80');
+    if(s.emperorHealth<=10)add('near_death','命悬一线','健康降至10以下');
+    if(s.achievements.length>=20 && ex.indexOf('ultimate')<0){
+        add('ultimate','千古一帝','完成所有主要成就');
+        s.emperorHealthMax = 110;
+        s.administrationEfficiency = clamp(Number(s.administrationEfficiency)+5,0,100);
+        s.prestige = clamp(Number(s.prestige)+10,0,100);
+        addLog('👑 天命所归：健康上限+10，行政效率+5，声望+10','success');
+    }
+}
+function checkNearMinisters(){
+    var s=gameState;
+    var allOffs=[s.officials.内阁首辅];
+    Object.keys(s.officials.六部尚书).forEach(function(k){allOffs.push(s.officials.六部尚书[k]);});
+    allOffs.forEach(function(o){
+        if(o&&Number(o.favor)>=80&&s.nearMinisters.indexOf(o.name)<0){
+            s.nearMinisters.push(o.name);
+            o.loyalty=100;
+            s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+1,0,100);
+            addLog('💖 君恩似海，'+o.name+'忠诚永久锁定100，行政效率+1','success');
+            addLog('👑 '+o.name+' 成为近臣！','important');
+        }
+    });
+}
+function checkGameOver(){
+    var s=gameState;
+    if(s.gameOver)return;
+    var failed=false,reason='';
+    if(Number(s.emperorHealth)<=0){
+        var heir=s.heirs.find(function(h){return h.gender==='皇子';});
+        if(heir){
+            s.emperorHealth=70;s.emperorAge=20;s.emperorName=heir.name;
+            s.heirs=s.heirs.filter(function(h){return h.id!==heir.id;});
+            addLog('👑 先帝驾崩，太子'+heir.name+'继位！','important');
+            showModal('👑 新帝登基','太子'+heir.name+'继位！',[{label:'继续',onclick:'Game.closeModal()'}]);
+        }else{failed=true;reason='皇帝驾崩且无继承人！';}
+    }
+    if(Number(s.treasury)<-10000000){failed=true;reason='国库亏损超1000万两！';}
+    if(Number(s.prestige)<=0){failed=true;reason='声望归零！';}
+    if(Number(s.population)<=0){failed=true;reason='人口凋零！';}
+    if(failed){s.gameOver=true;showModal('💀 游戏结束',reason,[{label:'返回主菜单',onclick:'Game._gameOverToMenu()'}]);}
+}
+function _gameOverToMenu(){closeModal();gameState=null;showStartScreen();}
+function computeAdministrationEfficiency(s){
+    var eff=50;
+    var officials=[s.officials.内阁首辅];
+    Object.keys(s.officials.六部尚书).forEach(function(k){officials.push(s.officials.六部尚书[k]);});
+    var avg=0,count=0;
+    officials.forEach(function(o){if(o){avg+=(Number(o.ability)||0);count++;}});
+    if(count>0){avg=avg/count; eff+=Math.floor((avg-60)/2);}
+    if(Number(s.emperorHealth)>=70)eff+=5;
+    else if(Number(s.emperorHealth)<50)eff-=5;
+    if(Number(s.peopleSupport)>=60)eff+=5;
+    else if(Number(s.peopleSupport)<40)eff-=5;
+    if(s.localSystem){var ls=LOCAL_SYSTEMS.find(function(x){return x.name===s.localSystem;});if(ls&&ls.desc.indexOf('效率')>=0)eff+=10;}
+    eff+=Math.floor((s.infrastructure.驿站||0)*1);
+    eff+=Math.floor((s.infrastructure.官道||0)*1);
+    eff+=Math.floor((Number(s.technology.文化)||0)*2);
+    eff+=Math.floor((Number(s.technology.工业)||0)*1);
+    if(s.cultivation&&s.cultivation.realmIndex>0)eff+=Math.floor(s.cultivation.realmIndex*0.5);
+    if(s.efficiencyBonusTurns>0)eff+=2;
+    return clamp(eff,0,100);
+}
+function applyBuildEffects(s){
+    var infra=s.infrastructure;
+    var bonus={treasury:0,grain:0,support:0,prestige:0};
+    bonus.grain+=Math.floor((infra.农田||0)*5000*0.05);
+    bonus.grain+=Math.floor((infra.灌溉渠||0)*3000*0.08);
+    bonus.treasury+=Math.floor((infra.市集||0)*5000);
+    bonus.treasury+=Math.floor((infra.铸钱局||0)*3000);
+    bonus.treasury+=Math.floor((infra.盐场||0)*4000);
+    bonus.treasury+=Math.floor((infra.织造局||0)*2000);
+    bonus.prestige+=Math.floor((infra.社稷坛||0)*3);
+    bonus.support+=Math.floor((infra.惠民药局||0)*2);
+    bonus.support+=Math.floor((infra.义仓||0)*2);
+    bonus.support+=Math.floor((infra.养济院||0)*2);
+    bonus.support+=Math.floor((infra.御花园||0)*1);
+    if(infra.孔庙)s.factions.文官=clamp(Number(s.factions.文官)+(infra.孔庙||0)*3,0,100);
+    if(infra.武庙)s.factions.武将=clamp(Number(s.factions.武将)+(infra.武庙||0)*3,0,100);
+    if(infra.太庙)s.factions.宗室=clamp(Number(s.factions.宗室)+(infra.太庙||0)*3,0,100);
+    if(infra.铁矿)s.iron=clamp(Number(s.iron)+Math.floor((infra.铁矿||0)*500),0,999999);
+    if(infra.军器监)s.armyPower=clamp(Number(s.armyPower)+Math.floor((infra.军器监||0)*2),0,100);
+    return bonus;
+}
+function applyArmyEquipmentEffects(s){
+    var totalEq=0;
+    Object.keys(s.armyEquipment).forEach(function(k){totalEq+=Number(s.armyEquipment[k])||0;});
+    s.armyPower=clamp(Number(s.armyPower)+Math.floor(totalEq*2),0,100);
+}
+function advanceMonth(){
+    if(isProcessing||gameState.isProcessing)return;
+    isProcessing=true;gameState.isProcessing=true;
+    try{
+        var s=gameState;
+        // 强制数字有效性，修复 NaN 和人口为0
+        s.treasury = Number(s.treasury) || 0;
+        s.grain = Number(s.grain) || 0;
+        s.iron = Number(s.iron) || 0;
+        s.population = Number(s.population) || 0;
+        if(s.population <= 0) s.population = 4000; // 人口兜底
+        s.population = Math.max(1, s.population);
+        s.peopleSupport = Number(s.peopleSupport) || 60;
+        s.administrationEfficiency = Number(s.administrationEfficiency) || 60;
+        s.armyMorale = Number(s.armyMorale) || 60;
+        s.armyPower = Number(s.armyPower) || 50;
+        s.emperorHealth = Number(s.emperorHealth) || 80;
+        s.emperorHealthMax = Number(s.emperorHealthMax) || 100;
+        s.prestige = Number(s.prestige) || 55;
+        s.cloth = Number(s.cloth) || 0;
+        s.medicine = Number(s.medicine) || 0;
+        s.wood = Number(s.wood) || 0;
+        s.stone = Number(s.stone) || 0;
+        Object.keys(s.army).forEach(function(k){ s.army[k] = Number(s.army[k]) || 0; });
+
+        // 月度推进
+        s.month+=1;
+        if(s.month>12){
+            s.month=1;
+            s.year+=1;
+            s.emperorAge+=1;
+        }
+        resetMonthlyActions();
+
+        // ========== 年度总结 ==========
+        if(s.month===1 && s.year>1){
+            var annualTitle='';
+            if(Number(s.peopleSupport)>=80 && Number(s.treasury)>50000000){
+                annualTitle='太平盛世';
+                s.prestige=clamp(Number(s.prestige)+2,0,100);
+                s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                addLog('🏮 年度总结：国泰民安，授予年号「太平盛世」，声望+2，民心+1','important');
+            } else if(Number(s.armyPower)>=80 && Number(s.prestige)>=70){
+                annualTitle='文治武功';
+                s.armyMorale=clamp(Number(s.armyMorale)+2,0,100);
+                s.prestige=clamp(Number(s.prestige)+1,0,100);
+                addLog('🏮 年度总结：武功赫赫，授予年号「文治武功」，士气+2，声望+1','important');
+            } else if(s.cultivation.realmIndex>=3){
+                annualTitle='仙缘深厚';
+                s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+50;
+                s.emperorHealth=clamp(Number(s.emperorHealth)+2,0,s.emperorHealthMax);
+                addLog('🏮 年度总结：仙缘深厚，授予年号「仙缘深厚」，修为+50，健康+2','important');
+            } else {
+                annualTitle='勤政之君';
+                s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+1,0,100);
+                addLog('🏮 年度总结：勤政爱民，授予年号「勤政之君」，行政效率+1','important');
+            }
+            showToast('🏮 年号奖励：'+annualTitle,'success');
+        }
+
+        // ========== 连续勤政奖励 ==========
+        if(Number(s.consecutiveDiligentMonths)===3){
+            s.prestige=clamp(Number(s.prestige)+2,0,100);
+            s.treasury+=300000;
+            addLog('🏅 连续三月勤政，奖励：声望+2，国库+30万','success');
+        } else if(Number(s.consecutiveDiligentMonths)===6){
+            s.prestige=clamp(Number(s.prestige)+3,0,100);
+            s.officials.内阁首辅.favor=clamp(Number(s.officials.内阁首辅.favor)+3,0,100);
+            addLog('🏅 连续六月勤政，奖励：声望+3，首辅好感+3','success');
+        } else if(Number(s.consecutiveDiligentMonths)>=12){
+            s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+2,0,100);
+            s.treasury+=1000000;
+            addLog('🏅 连续一年勤政，奖励：行政效率+2，国库+100万','success');
+            s.consecutiveDiligentMonths=0;
+        }
+
+        // ========== 派系斗争随机触发 ==========
+        if(Math.random()<0.35){
+            var factions=[{name:'文官',val:Number(s.factions.文官)},{name:'武将',val:Number(s.factions.武将)},{name:'宗室',val:Number(s.factions.宗室)},{name:'外戚',val:Number(s.factions.外戚)},{name:'宦官',val:Number(s.factions.宦官)}];
+            var high=factions[0],low=factions[0];
+            factions.forEach(function(f){if(f.val>high.val)high=f;if(f.val<low.val)low=f;});
+            var diff=high.val-low.val;
+            if(diff>=20){
+                var event={title:'派系斗争：'+high.name+'压过'+low.name,desc:high.name+'势力日益壮大，与'+low.name+'矛盾激化，朝堂之上互相攻讦。',options:[
+                    {label:'支持'+high.name,effect:function(){chFaction(high.name,3);chFaction(low.name,-5);chPrestige(-1);addLog('📌 支持'+high.name+'，派系失衡加剧。','danger');}},
+                    {label:'支持'+low.name,effect:function(){chFaction(low.name,3);chFaction(high.name,-5);chPrestige(1);addLog('📌 支持'+low.name+'，勉强维持平衡。','success');}},
+                    {label:'和稀泥',effect:function(){chFaction(high.name,-2);chFaction(low.name,-2);chSupport(2);s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+2,0,100);s.efficiencyBonusTurns=3;addLog('📌 各打五十大板，朝野安定，行政效率临时+2（持续3月）','success');}}
+                ]};
+                s.factionEvents.push({id:getId(),date:getDate(),event:event,handled:false});
+                showModal('⚔️ 派系斗争',event.desc,event.options.map(function(opt,idx){return {label:opt.label,onclick:'Game.handleFactionEvent(\''+event.title+'\','+idx+')'};}));
+            }
+        }
+
+        // ========== 处理进行中的行动 ==========
+        var completed=[];
+        s.ongoingActions=s.ongoingActions.filter(function(a){
+            a.remainingMonths-=1;
+            if(a.remainingMonths<=0){completed.push(a);return false;}
+            return true;
+        });
+        completed.forEach(function(a){
+            if(a.type==='科举'){
+                s.prestige=clamp(Number(s.prestige)+3,0,100);
+                s.examsHeld+=1;
+                var candidates=[];
+                for(var i=0;i<5;i++){
+                    var isWen=Math.random()>0.3;
+                    candidates.push({id:getId(),name:rand(MALE_NAMES),ability:60+Math.floor(Math.random()*30),faction:isWen?'文官':'武将',isWen:isWen});
+                }
+                s.examCandidates=candidates;
+                addLog('📚 科举完成！获得5名人才','success');
+                if(candidates.some(function(c){return c.ability>=80;})){
+                    s.prestige=clamp(Number(s.prestige)+1,0,100);
+                    addLog('🌟 得才之喜，声望+1','success');
+                }
+            }else if(a.type==='出征'){
+                s.activeExpeditions=Math.max(0,s.activeExpeditions-1);
+                var d=s.diplomacy.find(function(x){return x.name===a.target;});
+                if(!d){
+                    addLog('⚔️ 出征目标消失','danger');
+                }else{
+                    var enemyPower=(d.army)?Math.floor(Number(d.army)/1000):50;
+                    var myPower=Math.floor(Number(s.armyPower)*(a.amount/50000))+(Number(s.armyMorale)/10);
+                    var tacticBonus=0;
+                    if(a.tactic==='强攻')tacticBonus=5;
+                    else if(a.tactic==='奇袭')tacticBonus=8;
+                    else if(a.tactic==='围困')tacticBonus=2;
+                    else if(a.tactic==='诱敌')tacticBonus=4;
+                    else if(a.tactic==='退守')tacticBonus=-5;
+                    myPower+=tacticBonus;
+                    var winChance=0.5+(myPower-enemyPower)/200;
+                    var win=Math.random()<winChance;
+                    s.warReports.push({id:getId(),target:a.target,general:a.general,won:win,enemyPower:enemyPower,myPower:myPower});
+                    if(win){
+                        s.prestige=clamp(Number(s.prestige)+5,0,100);
+                        s.treasury+=2000000;
+                        s.armyMorale=clamp(Number(s.armyMorale)+3,0,100);
+                        s.peopleSupport=clamp(Number(s.peopleSupport)+3,0,100);
+                        var capturedPop=Math.floor((Number(d.population)||0)*0.6);
+                        s.population=(Number(s.population)||0)+capturedPop;
+                        d.population=Math.max(0,(Number(d.population)||0)-capturedPop);
+                        var capturedSoldiers=Math.floor((Number(d.army)||0)*0.3);
+                        s.army.边军=(Number(s.army.边军)||0)+capturedSoldiers;
+                        d.army=Math.max(0,(Number(d.army)||0)-capturedSoldiers);
+                        var citiesToAdd=Math.min(Math.floor((Number(d.cities)||0)*0.5),3);
+                        for(var ci=0;ci<citiesToAdd;ci++){
+                            var newProvinceName=rand(['新州','平州','定州','安州','镇州','抚州','昌州','宁州']);
+                            s.provinces.push({id:getId(),name:newProvinceName,governor:rand(MALE_NAMES),population:100+Math.floor(Math.random()*200),citizenry:50+Math.floor(Math.random()*20),tax:20000+Math.floor(Math.random()*30000),garrison:10000+Math.floor(Math.random()*20000),special:'新附',level:1});
+                        }
+                        d.atWar=false;
+                        d.relation=clamp(Number(d.relation)-10,0,100);
+                        var general = s.generals.find(function(g){return g.name===a.general;});
+                        if(general && general.alive){
+                            general.experience=(Number(general.experience)||0)+15;
+                            general.command=clamp(Number(general.command)+2,0,100);
+                            general.loyalty=clamp(Number(general.loyalty)+2,0,100);
+                            addLog('🎖️ '+general.name+' 战功卓著，经验+15，统率+2，忠诚+2','success');
+                        }
+                        s.diplomacy.forEach(function(dipl){
+                            if(dipl.name !== a.target){
+                                dipl.relation=clamp(Number(dipl.relation)-2,0,100);
+                                dipl.aggression=clamp(Number(dipl.aggression)-5,0,100);
+                            }
+                        });
+                        addLog('⚔️ 军威大振，邻国畏惧，好战指数下降','success');
+                        if(Math.random()<0.4){
+                            s.prestige=clamp(Number(s.prestige)+2,0,100);
+                            s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                            addLog('🏛️ 献俘太庙，声望+2，民心+1','success');
+                        }
+                        if(Math.random()<0.3){
+                            d.relation=clamp(Number(d.relation)+10,0,100);
+                            s.prestige=clamp(Number(s.prestige)+1,0,100);
+                            addLog('🕊️ 以德服人，释放部分俘虏，战败国关系+10，声望+1','success');
+                        }
+                        addLog('⚔️ 战报：'+a.general+'出征'+a.target+'大捷！俘获人口'+fmt(capturedPop)+'万，俘虏士兵'+fmt(capturedSoldiers)+'，新得州府'+citiesToAdd+'座，国库+200万，民心+3，士气+3','success');
+                    }else{
+                        s.prestige=clamp(Number(s.prestige)-5,0,100);
+                        s.armyMorale=clamp(Number(s.armyMorale)-3,0,100);
+                        addLog('⚔️ 战报：出征'+a.target+'失利。','danger');
+                        d.atWar=false;
+                    }
+                    s.atWarWith=s.atWarWith.filter(function(n){return n!==a.target;});
+                }
+            }else if(a.type==='侦查'){
+                var d2=s.diplomacy.find(function(x){return x.name===a.target;});
+                if(d2){
+                    addLog('🕵️ 侦查'+a.target+'完成！兵力'+fmt(d2.army)+'，人口'+d2.population+'万，将领'+d2.generalName+'能力'+d2.generalAbility+'，城防'+d2.wallLevel+'，粮草'+d2.foodReserve,'important');
+                }
+            }else if(a.type==='建造'){
+                var bd=getBuildDefinitions()[a.data];
+                if(bd){
+                    s.infrastructure[a.data]=(Number(s.infrastructure[a.data])||0)+1;
+                    s.buildStreak=(Number(s.buildStreak)||0)+1;
+                    if(s.buildStreak>=3){
+                        s.buildStreak=0;
+                        s.officials.内阁首辅.favor=clamp(Number(s.officials.内阁首辅.favor)+2,0,100);
+                        s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                        addLog('🏗️ 大工告成，官员好感+2，民心+1','success');
+                    }
+                    addLog('🔨 '+bd.name+'建造完成，效果生效','success');
+                }
+            }
+        });
+
+        // ========== 密奏调查进度 ==========
+        s.secretReports.forEach(function(sr){
+            if(sr.remainingMonths>0){
+                sr.remainingMonths-=1;
+                if(sr.remainingMonths===0){
+                    var crimes=['贪腐','结党','谋反','受贿','欺君'];
+                    sr.found=rand(crimes);
+                    addLog('🕵️ 密奏调查完成：发现'+sr.target+'有'+sr.found+'之嫌！','danger');
+                }
+            }
+        });
+
+        // ========== 锦衣卫调查进度 ==========
+        s.investigations.forEach(function(inv){
+            if(inv.remainingMonths>0){
+                inv.remainingMonths-=1;
+                if(inv.remainingMonths===0){
+                    if(inv.found){addLog('🕵️ 调查完成：发现证据！可抄家','success');}
+                    else{addLog('🕵️ 调查完成：未发现异常','info');}
+                }
+            }
+        });
+
+        // ========== 军械装备效果 ==========
+        applyArmyEquipmentEffects(s);
+        var buildBonus=applyBuildEffects(s);
+        s.administrationEfficiency=computeAdministrationEfficiency(s);
+        if(s.efficiencyBonusTurns>0)s.efficiencyBonusTurns--;
+
+        // ========== 税收计算（详细） ==========
+        var effFactor=0.8+Number(s.administrationEfficiency)/100*0.4;
+        var costFactor=1-Number(s.administrationEfficiency)/250;
+        var tradeBonus=s.tradeAgreements.length*0.05;
+        var tradePenalty=s.warPenaltyTurns>0?0.2:0;
+        var commerceBonus=(Number(s.commerce.市舶司)||0)*0.01+(Number(s.commerce.商路)||0)*0.005+(Number(s.commerce.盐引)||0)*0.008+(Number(s.commerce.茶马互市)||0)*0.006;
+        var achievementTaxBonus=Number(s.achievementBonus.taxRate)||0;
+        var ecoFactor=1+tradeBonus+commerceBonus+achievementTaxBonus-tradePenalty;
+        var baseTax=Math.max(0,Number(s.population)*50+(Number(s.technology.商业)||0)*3000+(Number(s.infrastructure.市集)||0)*5000+Number(buildBonus.treasury));
+        var taxIncome=Math.floor(baseTax*effFactor*ecoFactor);
+        var militaryCost=0;
+        Object.keys(s.army).forEach(function(k){militaryCost+=Number(s.army[k]);});
+        militaryCost*=1.5*costFactor;
+        var policyNeg=0;
+        if(s.nationalPolicy){policyNeg=Math.floor(baseTax*0.05);}
+        var net=taxIncome-militaryCost-100000*costFactor-Number(s.harem.budget)-policyNeg;
+        net=Number(net)||0;
+        if(s.difficulty==='hardcore'){net=Math.floor(net*0.8);}
+        s.treasury+=net;
+        s.grain=clamp(Number(s.grain)+Math.floor(Number(s.population)*5+(Number(s.technology.农业)||0)*2000+Number(buildBonus.grain))-Math.floor(militaryCost/400),0,999999999);
+
+        // 赋税明细日志
+        var taxDetail = '📊 赋税明细：基础税收 '+fmt(baseTax)+'两，效率系数 '+effFactor.toFixed(2)+'，贸易/商业系数 '+ecoFactor.toFixed(2)+'，实际税收 '+fmt(taxIncome)+'两；军费 '+fmt(militaryCost)+'两，其他支出 '+(fmt(100000*costFactor+Number(s.harem.budget)+policyNeg))+'两，净收入 '+(net>=0?'+':'')+fmt(net)+'两。';
+        addLog(taxDetail,'system');
+
+        // ========== 仓储管理 ==========
+        if(s.grain>500000){
+            var rot=Math.floor((s.grain-500000)*0.05);
+            s.grain-=rot;
+            addLog('⚠️ 粮仓储粮过高，霉变损耗'+fmt(rot)+'石','danger');
+        }
+        if(s.grain<10000){
+            s.peopleSupport=clamp(Number(s.peopleSupport)-2,0,100);
+            addLog('⚠️ 粮储不足，百姓恐慌，民心-2','danger');
+        }
+        s.population+=Math.floor(Number(s.population)*0.001);
+        if(s.warPenaltyTurns>0){s.warPenaltyTurns--;}
+
+        // 国策负面
+        if(s.nationalPolicy){
+            s.nationalPolicy.remainingMonths-=1;
+            if(s.nationalPolicy.remainingMonths<=0){
+                addLog('📜 国策「'+s.nationalPolicy.name+'」到期','system');
+                s.nationalPolicy=null;
+            }else{
+                var ne=s.nationalPolicy.neg;
+                if(ne.indexOf('税收')>=0)s.treasury=clamp(Number(s.treasury)-Math.floor(baseTax*0.05),-999999999,999999999);
+                if(ne.indexOf('民心')>=0)s.peopleSupport=clamp(Number(s.peopleSupport)-2,0,100);
+                if(ne.indexOf('国库')>=0)s.treasury=clamp(Number(s.treasury)-Math.floor(baseTax*0.03),-999999999,999999999);
+                if(ne.indexOf('武将')>=0)s.factions.武将=clamp(Number(s.factions.武将)-2,0,100);
+                if(ne.indexOf('文官')>=0)s.factions.文官=clamp(Number(s.factions.文官)-2,0,100);
+                if(ne.indexOf('宗室')>=0)s.factions.宗室=clamp(Number(s.factions.宗室)-2,0,100);
+            }
+        }
+
+        // 地方制度负面
+        var ls=LOCAL_SYSTEMS.find(function(x){return x.name===s.localSystem;});
+        if(ls&&ls.neg){
+            if(ls.neg.indexOf('税收')>=0)s.treasury=clamp(Number(s.treasury)-Math.floor(baseTax*0.03),-999999999,999999999);
+            if(ls.neg.indexOf('民心')>=0)s.peopleSupport=clamp(Number(s.peopleSupport)-1,0,100);
+            if(ls.neg.indexOf('财政')>=0)s.treasury=clamp(Number(s.treasury)-Math.floor(baseTax*0.03),-999999999,999999999);
+            if(ls.neg.indexOf('边境')>=0)s.armyMorale=clamp(Number(s.armyMorale)-2,0,100);
+            if(ls.neg.indexOf('治安')>=0)s.peopleSupport=clamp(Number(s.peopleSupport)-1,0,100);
+            if(ls.neg.indexOf('中央')>=0)s.prestige=clamp(Number(s.prestige)-1,0,100);
+            if(ls.neg.indexOf('效率')>=0)s.administrationEfficiency=clamp(Number(s.administrationEfficiency)-2,0,100);
+            if(ls.neg.indexOf('俸禄')>=0)s.treasury=clamp(Number(s.treasury)-100000,-999999999,999999999);
+        }
+
+        // ========== 后宫怀孕生产 ==========
+        s.harem.members.forEach(function(m){
+            if(m.pregnant){
+                m.pregnancyMonth+=1;
+                if(m.pregnancyMonth>=9){
+                    m.pregnant=false;m.pregnancyMonth=0;m.hasNanny=false;m.hasMidwife=false;
+                    var gender=Math.random()>0.5?'皇子':'皇女';
+                    var cn=rand(gender==='皇子'?['承乾','承业','承志','承安','承辉']:['嫣然','若曦','静姝','婉清','月华']);
+                    var personality=rand(['勇武','聪慧','仁厚','阴狠','平庸']);
+                    var child={id:getId(),name:cn,gender:gender,motherId:m.id,motherName:m.name,birthYear:s.year,birthMonth:s.month,age:0,abilities:{武力:gender==='皇子'?10:5,智力:gender==='皇子'?10:8,政治:gender==='皇子'?8:10,魅力:10},title:gender==='皇子'?'皇子':'皇女',personality:personality,talent:rand(['武学','文学','谋略','无']),teacher:'',education:{文:0,武:0,政:0,谋:0},isCrownPrince:false,title2:'无'};
+                    m.children.push(child.id);s.heirs.push(child);
+                    addLog('👶 '+m.name+'诞下'+gender+'【'+cn+'】（'+personality+'）！','success');
+                    if(child.abilities.武力>=80||child.abilities.智力>=80||child.abilities.政治>=80){
+                        s.emperorHealth=clamp(Number(s.emperorHealth)+3,0,s.emperorHealthMax);
+                        s.prestige=clamp(Number(s.prestige)+1,0,100);
+                        s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                        addLog('👼 天降麟儿/凤女，健康+3，声望+1，民心+1','success');
+                    }
+                    if(m.rank==='皇后'||['贵妃','淑妃','德妃','贤妃'].indexOf(m.rank)>=0){
+                        s.harem.members.forEach(function(x){x.favor=clamp(Number(x.favor)+1,0,100);});
+                        addLog('🎉 '+(m.rank==='皇后'?'嫡子降生':'爱妃诞子')+'，后宫全体宠爱+1','success');
+                    }
+                }
+            }
+        });
+
+        // ========== 子嗣成长 ==========
+        s.heirs.forEach(function(h){
+            if(s.month===1)h.age+=1;
+            if(h.age<18&&Math.random()>0.7){
+                h.abilities.武力=clamp(Number(h.abilities.武力)+(h.personality==='勇武'?3:1),0,100);
+                h.abilities.智力=clamp(Number(h.abilities.智力)+(h.personality==='聪慧'?3:1),0,100);
+                if(h.teacher){
+                    h.education.文=clamp(Number(h.education.文)+1,0,100);
+                    h.education.武=clamp(Number(h.education.武)+1,0,100);
+                }
+            }
+            if(h.age===18 && (Number(h.abilities.武力)+Number(h.abilities.智力)+Number(h.abilities.政治)+Number(h.abilities.魅力))>=300){
+                s.prestige=clamp(Number(s.prestige)+2,0,100);
+                s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);
+                addLog('🌟 后继有人，声望+2，民心+1','success');
+            }
+        });
+
+        // ========== 皇帝健康 ==========
+        s.emperorHealth=clamp(Number(s.emperorHealth)-(Math.random()>0.85?1:0),0,s.emperorHealthMax);
+
+        // ========== 后宫失宠事件 ==========
+        var lowFavorMembers=s.harem.members.filter(function(m){return m.favor<20;});
+        if(lowFavorMembers.length&&Math.random()>0.7){
+            var lf=rand(lowFavorMembers);
+            addLog('⚠️ 佳丽'+lf.name+'因长期失宠而郁郁寡欢，宠爱度过低！','danger');
+            lf.favor=clamp(Number(lf.favor)+5,0,100);
+            s.peopleSupport=clamp(Number(s.peopleSupport)-2,0,100);
+        }
+
+        // ========== 修仙奇遇 ==========
+        if(s.cultivation.unlocked&&Math.random()<0.25){
+            var events=[
+                {msg:'🧘 闭关修炼，心有所悟',eff:function(){s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+15;}},
+                {msg:'🌩️ 天劫降临，险些丧命',eff:function(){s.emperorHealth=clamp(Number(s.emperorHealth)-10,0,s.emperorHealthMax);s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+30;}},
+                {msg:'👤 仙人指路，修为大进',eff:function(){s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+40;s.prestige=clamp(Number(s.prestige)+2,0,100);}},
+                {msg:'🏞️ 秘境探索，得灵药',eff:function(){s.cultivation.pills.push({name:'灵丹',quality:'上品'});}},
+                {msg:'💭 心魔入体，心神不宁',eff:function(){s.emperorHealth=clamp(Number(s.emperorHealth)-5,0,s.emperorHealthMax);s.cultivation.cultivationExp=clamp(Number(s.cultivation.cultivationExp)-10,0,999999);}},
+                {msg:'💧 灵泉沐浴，身心舒畅',eff:function(){s.emperorHealth=clamp(Number(s.emperorHealth)+8,0,s.emperorHealthMax);}},
+                {msg:'🌧️ 天降甘霖，旱灾解除',eff:function(){s.provinceEvents=s.provinceEvents.filter(function(e){return e.type!=='旱灾';}); s.peopleSupport=clamp(Number(s.peopleSupport)+3,0,100);}}
+            ];
+            var evt=rand(events);evt.eff();addLog('🔮 修仙奇遇：'+evt.msg,'important');
+        }
+
+        // ========== 灵兽随机正面事件 ==========
+        s.spiritBeasts.forEach(function(beast){
+            if(Math.random()<0.2){
+                var effect=rand(['health','treasury','support']);
+                if(effect==='health'){s.emperorHealth=clamp(Number(s.emperorHealth)+1,0,s.emperorHealthMax);addLog('🐉 灵兽护主，健康+1','success');}
+                else if(effect==='treasury'){s.treasury+=100000;addLog('🐉 灵兽献瑞，国库+10万','success');}
+                else {s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);addLog('🐉 灵兽呈祥，民心+1','success');}
+            }
+        });
+
+        // ========== 随机特殊事件 ==========
+        if(Math.random()>0.4){
+            var evts=[
+                {msg:'🌾 风调雨顺，丰收',eff:function(){s.grain+=20000;}},
+                {msg:'🌊 南方水患',eff:function(){s.grain=Math.max(0,s.grain-10000);}},
+                {msg:'🏥 瘟疫流行',eff:function(){s.population=Math.max(1,s.population-10);}},
+                {msg:'🤒 皇帝偶感风寒',eff:function(){s.emperorHealth=clamp(Number(s.emperorHealth)-8,0,s.emperorHealthMax);}},
+                {msg:'✨ 祥瑞现世',eff:function(){s.prestige=clamp(Number(s.prestige)+3,0,100);s.peopleSupport=clamp(Number(s.peopleSupport)+3,0,100);}},
+                {msg:'📜 文人雅集',eff:function(){s.factions.文官=clamp(Number(s.factions.文官)+3,0,100);}},
+                {msg:'⚔️ 武将比武',eff:function(){s.factions.武将=clamp(Number(s.factions.武将)+3,0,100);s.armyMorale=clamp(Number(s.armyMorale)+3,0,100);}},
+                {msg:'💎 矿脉发现',eff:function(){s.iron=clamp(Number(s.iron)+3000,0,999999);}},
+                {msg:'📈 商路畅通',eff:function(){s.treasury+=800000;}},
+                {msg:'🧧 百姓献礼',eff:function(){s.treasury+=500000;s.peopleSupport=clamp(Number(s.peopleSupport)+2,0,100);}},
+                {msg:'🛡️ 将士请战',eff:function(){s.armyMorale=clamp(Number(s.armyMorale)+5,0,100);}},
+                {msg:'👑 万国来朝',eff:function(){s.prestige=clamp(Number(s.prestige)+5,0,100);s.treasury+=2000000;}}
+            ];
+            var evt2=rand(evts);evt2.eff();addLog('📢 '+evt2.msg,'important');
+        }
+
+        // ========== 州府事件 ==========
+        if(Math.random()>0.6){
+            var p=rand(s.provinces);
+            var type=rand(['水灾','旱灾','民变']);
+            var options=[];
+            if(type==='水灾')options=[{label:'赈灾（-5万石粮）',effect:function(){if(s.grain>=50000){s.grain-=50000;p.citizenry=clamp(Number(p.citizenry)+5,0,100);}}},{label:'不管（民心-8）',effect:function(){p.citizenry=clamp(Number(p.citizenry)-8,0,100);}}];
+            else if(type==='旱灾')options=[{label:'引水（-10万两）',effect:function(){if(s.treasury>=100000){s.treasury-=100000;p.citizenry=clamp(Number(p.citizenry)+3,0,100);}}},{label:'祈雨（民心-2）',effect:function(){p.citizenry=clamp(Number(p.citizenry)-2,0,100);}}];
+            else options=[{label:'镇压（-5万两）',effect:function(){if(s.treasury>=50000){s.treasury-=50000;p.garrison=Math.max(0,Number(p.garrison)-5000);}}},{label:'安抚（-5万两，民心+5）',effect:function(){if(s.treasury>=50000){s.treasury-=50000;p.citizenry=clamp(Number(p.citizenry)+5,0,100);}}}];
+            s.provinceEvents.push({id:getId(),provinceId:p.id,provinceName:p.name,type:type,options:options,handled:false,required:true});
+        }
+
+        // ========== 外交友邦进贡 ==========
+        s.diplomacy.forEach(function(d){
+            if(Number(d.relation)>=80 && Math.random()<0.2){
+                var tribute=rand(['iron','cloth','medicine']);
+                if(tribute==='iron')s.iron=clamp(Number(s.iron)+500,0,999999);
+                else if(tribute==='cloth')s.cloth=clamp(Number(s.cloth)+1000,0,999999);
+                else s.medicine=clamp(Number(s.medicine)+500,0,999999);
+                addLog('🎁 友邦来朝，进贡'+tribute,'success');
+            }
+        });
+
+        // ========== 修仙解锁 ==========
+        if(s.year>=5&&!s.cultivation.unlocked){
+            s.cultivation.unlocked=true;s.cultivation.realmIndex=1;s.cultivation.realm='炼气';
+            addLog('🔮 修仙体系解锁！','system');
+        }
+
+        // ========== 月度亮点总结 ==========
+        var monthlyHighlights=[];
+        if(net>0)monthlyHighlights.push('本月国库盈余 '+fmt(net)+' 两');
+        if(s.examCandidates.length>0)monthlyHighlights.push('本月科举得才 '+s.examCandidates.length+' 人');
+        if(s.atWarWith.length===0)monthlyHighlights.push('边境安然无事');
+        if(s.harem.members.some(function(m){return m.pregnant;}))monthlyHighlights.push('后宫有喜');
+        if(Number(s.cultivation.cultivationExp)>0)monthlyHighlights.push('修仙精进');
+        if(monthlyHighlights.length>0){
+            addLog('✨ 本月亮点：'+monthlyHighlights.join('，'),'success');
+            var bonusType=rand(['民心','声望','国库']);
+            if(bonusType==='民心'){s.peopleSupport=clamp(Number(s.peopleSupport)+1,0,100);addLog('奖励：民心+1','success');}
+            else if(bonusType==='声望'){s.prestige=clamp(Number(s.prestige)+1,0,100);addLog('奖励：声望+1','success');}
+            else {s.treasury+=100000;addLog('奖励：国库+10万两','success');}
+        }
+
+        // ========== 民心阶段奖励 ==========
+        if(s.peopleSupport>=80&&s.supportMilestones.indexOf(80)<0){s.supportMilestones.push(80);s.treasury+=500000;addLog('🏮 百姓安居，国库+50万','success');}
+        if(s.peopleSupport>=90&&s.supportMilestones.indexOf(90)<0){s.supportMilestones.push(90);s.prestige=clamp(Number(s.prestige)+2,0,100);addLog('🏮 路不拾遗，声望+2','success');}
+        if(s.peopleSupport>=100&&s.supportMilestones.indexOf(100)<0){s.supportMilestones.push(100);s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+2,0,100);addLog('🏮 盛世之象，行政效率+2','success');}
+
+        // ========== 小目标检查 ==========
+        var nextGoal=getNextSmallGoal(s);
+        if(nextGoal&&nextGoal.check()){
+            completeSmallGoal(s,nextGoal);
+        }
+
+        // ========== 日志与保存 ==========
+        addLog('📅 '+getDate()+' 税收'+fmt(taxIncome)+'，净收入'+(net>=0?'+':'')+fmt(net)+'，效率'+s.administrationEfficiency,'system');
+        checkAchievements();checkNearMinisters();checkGameOver();
+        saveToSlot(currentSlot);refreshUI();
+    }finally{
+        isProcessing=false;gameState.isProcessing=false;
+    }
+}
+// ========== 全局辅助函数 ==========
+function chPrestige(d){ gameState.prestige = clamp(Number(gameState.prestige) + d, 0, 100); }
+function chMorale(d){ gameState.armyMorale = clamp(Number(gameState.armyMorale) + d, 0, 100); }
+function chFaction(f, d){ gameState.factions[f] = clamp(Number(gameState.factions[f]) + d, 0, 100); }
+function chSupport(d){ gameState.peopleSupport = clamp(Number(gameState.peopleSupport) + d, 0, 100); }
+
+function handleFactionEvent(title, idx){
+    var ev = gameState.factionEvents.find(function(e){ return e.event.title === title && !e.handled; });
+    if(!ev) return;
+    var opt = ev.event.options[idx];
+    if(opt){
+        opt.effect();
+        ev.handled = true;
+        saveToSlot(currentSlot);
+        refreshUI();
+    }
+}
+
+function handleProvinceEvent(peid, oi){
+    var ev = gameState.provinceEvents.find(function(e){ return e.id === peid; });
+    if(!ev || ev.handled) return;
+    var opt = ev.options[oi];
+    if(opt){
+        opt.effect();
+        ev.handled = true;
+        addLog('🏙️ 州府事件处理','important');
+        saveToSlot(currentSlot);
+        refreshUI();
+    }
+}
+
+function confirmAdvanceMonth(){
+    if(gameState.inCourt){
+        showToast('朝会中，先退朝','danger');
+        return;
+    }
+    showModal('📅 进入下一个月','确认推进吗？',[
+        {label:'确认',onclick:'Game._doAdvanceMonth()'},
+        {label:'取消',onclick:'Game.closeModal()'}
+    ]);
+}
+
+function _doAdvanceMonth(){
+    closeModal();
+    advanceMonth();
+}
+
+// ========== 小目标系统 ==========
+function getNextSmallGoal(s){
+    var goals = [
+        {id:'treasury_10m', text:'国库达到1000万两', check:function(){return s.treasury>=10000000;}, reward:'声望+1'},
+        {id:'support_80', text:'民心提升至80', check:function(){return s.peopleSupport>=80;}, reward:'行政效率+1'},
+        {id:'province_8', text:'拥有8座州府', check:function(){return s.provinces.length>=8;}, reward:'国库+50万'},
+        {id:'harem_10', text:'后宫佳丽达到10人', check:function(){return s.harem.members.length>=10;}, reward:'全体佳丽宠爱+2'},
+        {id:'general_3', text:'拥有3名将领', check:function(){return s.generals.length>=3;}, reward:'士气+3'},
+        {id:'building_5', text:'建成5座建筑', check:function(){var cnt=0;Object.keys(s.infrastructure).forEach(function(k){cnt+=Number(s.infrastructure[k])||0;});return cnt>=5;}, reward:'行政效率+1'},
+        {id:'cultivation_2', text:'修仙达到筑基', check:function(){return s.cultivation.realmIndex>=2;}, reward:'修为+50'}
+    ];
+    for(var i=0;i<goals.length;i++){
+        if(!goals[i].check()){
+            return goals[i];
+        }
+    }
+    return null;
+}
+
+function completeSmallGoal(s, goal){
+    if(goal.reward === '声望+1') s.prestige=clamp(Number(s.prestige)+1,0,100);
+    else if(goal.reward === '行政效率+1') s.administrationEfficiency=clamp(Number(s.administrationEfficiency)+1,0,100);
+    else if(goal.reward === '国库+50万') s.treasury+=500000;
+    else if(goal.reward === '全体佳丽宠爱+2') s.harem.members.forEach(function(m){m.favor=clamp(Number(m.favor)+2,0,100);});
+    else if(goal.reward === '士气+3') s.armyMorale=clamp(Number(s.armyMorale)+3,0,100);
+    else if(goal.reward === '修为+50') s.cultivation.cultivationExp=(Number(s.cultivation.cultivationExp)||0)+50;
+    addLog('🎯 完成小目标：'+goal.text+'，奖励：'+goal.reward, 'success');
+    showToast('🎯 完成小目标：'+goal.text, 'success');
+}
+
+// ========== UI 渲染 ==========
+function refreshUI(){
+    var s = gameState;
+    if(!s) return;
+    // 确保字段有效
+    s.treasury = Number(s.treasury)||0;
+    s.grain = Number(s.grain)||0;
+    s.iron = Number(s.iron)||0;
+    s.population = Number(s.population)||0;
+    if(s.population <= 0) s.population = 4000;
+    s.peopleSupport = Number(s.peopleSupport)||60;
+    s.administrationEfficiency = Number(s.administrationEfficiency)||60;
+    s.armyMorale = Number(s.armyMorale)||60;
+    s.armyPower = Number(s.armyPower)||50;
+    s.emperorHealth = Number(s.emperorHealth)||80;
+    s.emperorHealthMax = Number(s.emperorHealthMax)||100;
+    s.prestige = Number(s.prestige)||55;
+    document.getElementById('emblemText').textContent = s.nationName[0] || '魏';
+    document.getElementById('headerTitle').textContent = s.nationName + '·' + s.eraName;
+    document.getElementById('headerInfo').textContent = s.emperorTitle + ' ' + s.emperorName + ' · ' + s.capital + ' | ' + getDate();
+    renderDashboard(s);
+    renderTabs(s);
+    renderEmperor(s);
+    renderFactions(s);
+    renderDialogues(s);
+    renderLog(s);
+    renderCurrentTab(s);
+}
+
+function renderDashboard(s){
+    var totalArmy = 0;
+    Object.keys(s.army).forEach(function(k){ totalArmy += Number(s.army[k])||0; });
+    var preg = s.harem.members.filter(function(m){return m.pregnant;}).length;
+    var heirs = s.heirs.length;
+    var html = '';
+    html += '<div class="dash-item"><span>📅</span><span>'+getDate()+'</span></div>';
+    html += '<div class="dash-item"><span>⭐</span><span>声望'+s.prestige+'</span></div>';
+    html += '<div class="dash-item"><span>💖</span><span>民心'+s.peopleSupport+'</span></div>';
+    html += '<div class="dash-item"><span>⚡</span><span>效率'+s.administrationEfficiency+'</span></div>';
+    html += '<div class="dash-item"><span>💰</span><span>'+fmt(s.treasury)+'两</span></div>';
+    html += '<div class="dash-item"><span>🌾</span><span>'+fmt(s.grain)+'石</span></div>';
+    html += '<div class="dash-item"><span>⛏️</span><span>铁矿'+fmt(s.iron)+'</span></div>';
+    html += '<div class="dash-item"><span>👥</span><span>'+(s.population||0)+'万</span></div>';
+    html += '<div class="dash-item"><span>⚔️</span><span>'+fmt(totalArmy)+'</span></div>';
+    html += '<div class="dash-item"><span>💪</span><span>战力'+s.armyPower+'</span></div>';
+    html += '<div class="dash-item"><span>👸</span><span>佳丽'+s.harem.members.length+'</span></div>';
+    html += '<div class="dash-item"><span>🤰</span><span>在孕'+preg+'</span></div>';
+    html += '<div class="dash-item"><span>👶</span><span>子嗣'+heirs+'</span></div>';
+    html += '<div class="dash-item"><span>💚</span><span>健康'+s.emperorHealth+'</span></div>';
+    html += '<div class="dash-item"><span>🔮</span><span>'+s.cultivation.realm+'</span></div>';
+    html += '<div class="dash-item"><span>📜</span><span>国策'+(s.nationalPolicy?s.nationalPolicy.name:'无')+'</span></div>';
+    document.getElementById('dashboard').innerHTML = html;
+}
+
+function renderTabs(s){
+    var tabs = [
+        ['dashboard','🏛️国情'],['court','📯上朝'],['inner','📋内政'],['military','⚔️军事'],
+        ['finance','💰财政'],['harem','👸后宫'],['officials','👔官员'],['provinces','🏙️州府'],
+        ['infra','🔨基建'],['diplomacy','🌏外交'],['scout','🕵️侦查'],['tech','🔬科技'],
+        ['policy','📜国策'],['heirs','👶子嗣'],['medic','👨‍⚕️御医'],['cultivation','🔮修仙'],
+        ['encyclopedia','📖百科'],['achievements','🏆成就']
+    ];
+    var html = '';
+    tabs.forEach(function(t){
+        var disabled = (t[0]==='cultivation' && !s.cultivation.unlocked);
+        html += '<button class="tab-btn '+(currentTab===t[0]?'active':'')+(disabled?' disabled-tab':'')+'" '+(disabled?'disabled':'')+' onclick="Game.switchTab(\''+t[0]+'\')">'+t[1]+'</button>';
+    });
+    document.getElementById('leftTabs').innerHTML = html;
+}
+
+function renderEmperor(s){
+    var expPercent = Math.floor((Number(s.cultivation.cultivationExp)||0)/(Number(s.cultivation.cultivationMaxExp)||100)*100);
+    document.getElementById('emperorBox').innerHTML = '<div style="font-size:.7em;">👑 '+s.emperorName+'<br>年龄：'+s.emperorAge+'岁<br>健康：'+s.emperorHealth+'/'+(s.emperorHealthMax||100)+'<br>境界：'+s.cultivation.realm+'<br>修为：'+expPercent+'%<br>功法：'+s.cultivation.method+'</div>';
+}
+
+function renderFactions(s){
+    var items = [['文官',s.factions.文官],['武将',s.factions.武将],['宗室',s.factions.宗室],['外戚',s.factions.外戚],['宦官',s.factions.宦官]];
+    var html = '';
+    items.forEach(function(f){
+        html += '<div style="display:flex;align-items:center;gap:3px;font-size:.62em;margin:2px 0;"><span style="min-width:30px;">'+f[0]+'</span><div style="flex:1;height:4px;background:rgba(0,0,0,.4);border-radius:2px;overflow:hidden;"><div style="width:'+clamp(Number(f[1]),0,100)+'%;height:100%;background:#c9a84c;"></div></div><span>'+clamp(Number(f[1]),0,100)+'</span></div>';
+    });
+    document.getElementById('factionBox').innerHTML = html;
+}
+
+function renderDialogues(s){
+    var recent = s.dialogues.slice(-10).reverse();
+    var html = '';
+    recent.forEach(function(d){
+        html += '<div style="font-size:.6em;padding:1px 0;"><strong style="color:var(--gold);">'+d.speaker+'：</strong>'+d.content+'</div>';
+    });
+    document.getElementById('dialogueBox').innerHTML = html || '<span style="color:var(--text3);">暂无对话</span>';
+}
+
+function renderLog(s){
+    var recent = s.chronicle.slice(-30).reverse();
+    var html = '';
+    recent.forEach(function(e){
+        html += '<div class="log-entry '+e.type+'"><span class="time">['+e.time+']</span>'+e.message+'</div>';
+    });
+    document.getElementById('logPanel').innerHTML = html;
+}
+
+function renderCurrentTab(s){
+    var renderers = {
+        dashboard:rDashboard, court:rCourt, inner:rInner, military:rMilitary,
+        finance:rFinance, harem:rHarem, officials:rOfficials, provinces:rProvinces,
+        infra:rInfra, diplomacy:rDiplomacy, scout:rScout, tech:rTech,
+        policy:rPolicy, heirs:rHeirs, medic:rMedic, cultivation:rCultivation,
+        encyclopedia:rEncyclopedia, achievements:rAchievements
+    };
+    var r = (renderers[currentTab] || rDashboard)(s);
+    document.getElementById('panelTitle').textContent = r.title;
+    document.getElementById('contentBody').innerHTML = r.content;
+    document.getElementById('actionPanel').innerHTML = r.actions;
+}
+function rDashboard(s){
+    var nextGoal = getNextSmallGoal(s);
+    var goalHtml = nextGoal ? '<p style="font-size:.65em;color:var(--gold);">🎯 下一目标：'+nextGoal.text+'（奖励：'+nextGoal.reward+'）</p>' : '<p style="font-size:.65em;color:var(--gold);">🎯 所有小目标已完成！</p>';
+    return{
+        title:'国情总览',
+        content:'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:5px;font-size:.75em;">'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">👑 '+s.emperorTitle+' '+s.emperorName+'</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">📅 '+getDate()+'</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">💰 国库<br><strong>'+fmt(s.treasury)+'两</strong></div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">🌾 粮储<br>'+fmt(s.grain)+'石</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">⛏️ 铁矿<br>'+fmt(s.iron)+'</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">👥 人口 '+(s.population||0)+'万</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">⭐ 声望 '+s.prestige+'</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">💖 民心 '+s.peopleSupport+'</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">⚡ 效率 '+s.administrationEfficiency+'</div>'+
+            '<div style="background:var(--bg3);padding:6px;border-radius:4px;">📜 国策 '+(s.nationalPolicy?s.nationalPolicy.name:'无')+'</div>'+
+        '</div>'+goalHtml+'<p style="margin-top:6px;font-size:.7em;color:var(--text2);">📈 税收受行政效率加成，花费受效率减免。</p>',
+        actions:'<button class="gold-btn" onclick="Game.confirmAdvanceMonth()" title="推进到下个月，结算所有收入支出">📅下个月</button>'+
+            '<button onclick="Game.switchTab(\'court\')" '+(s.inCourt?'disabled':'')+' title="进入朝会处理国事">📯上朝</button>'+
+            '<button onclick="Game.switchTab(\'military\')" title="管理军队与出征">⚔️军事</button>'+
+            '<button onclick="Game.switchTab(\'encyclopedia\')" title="查看游戏规则与操作指南">📖百科</button>'
+    };
+}
+function rCourt(s){
+    if(s.inCourt&&s.courtSession.active){
+        var issHtml='';
+        s.courtSession.issues.forEach(function(iss,idx){
+            if(iss.handled)return;
+            var opts='';
+            iss.options.forEach(function(opt,oi){
+                opts+='<button onclick="Game.performAction(\'处理议题\',{issueIndex:'+idx+',optionIndex:'+oi+'})" '+(s.courtSession.courtEnergy<=0?'disabled':'')+' title="'+opt.label+'">'+opt.label+'</button> ';
+            });
+            issHtml+='<div style="background:var(--bg3);padding:6px;border-radius:4px;margin-bottom:4px;font-size:.72em;'+(iss.required?'border:2px solid var(--red);':'')+'"><strong>['+iss.category+'] '+iss.title+'</strong>'+(iss.required?'<span style="color:var(--red-light);">[必须]</span>':'')+'<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">'+opts+'</div>'+(iss.required?'':'<button onclick="Game.performAction(\'跳议题\',{issueIndex:'+idx+'})" style="font-size:.6em;" title="跳过此议题，声望-1">跳过</button>')+'</div>';
+        });
+        return{title:'朝会中',content:'<p>精力：<strong>'+s.courtSession.courtEnergy+'</strong> | 已处理：'+s.courtSession.issuesHandled+'</p>'+issHtml,actions:'<button class="danger" onclick="Game.performAction(\'退朝\')" title="结束朝会（必须处理完红框议题）">📯退朝</button>'};
+    }
+    var recordHtml='';
+    if(s.courtRecords.length){
+        recordHtml='<p style="font-size:.65em;margin-top:5px;"><strong>朝会记录：</strong></p>';
+        s.courtRecords.slice(0,10).forEach(function(r){
+            recordHtml+='<div style="font-size:.62em;padding:1px 0;">['+r.date+'] '+r.issue+' → '+r.choice+'</div>';
+        });
+    }
+    var debateHtml='';
+    if(s.courtDebates.length){
+        debateHtml='<p style="font-size:.65em;margin-top:5px;"><strong>廷议记录：</strong></p>';
+        s.courtDebates.forEach(function(r){
+            debateHtml+='<div style="font-size:.62em;padding:1px 0;">['+r.date+'] '+r.issue+' → '+r.result+'</div>';
+        });
+    }
+    return{title:'上朝议政',content:'<p style="font-size:.72em;">每月可上朝一次。红框议题必须处理。</p>'+recordHtml+debateHtml,actions:isActionUsed('上朝')?'<button disabled title="本月已上朝">本月已上朝</button>':'<button class="gold-btn" onclick="Game.performAction(\'上朝\')" title="开启朝会，处理国事议题">📯上朝</button>'};
+}
+function rInner(s){
+    var candHtml='';
+    if(s.examCandidates.length){
+        candHtml='<p style="font-size:.68em;"><strong>科举人才：</strong></p>';
+        s.examCandidates.forEach(function(c){
+            candHtml+='<div style="font-size:.65em;padding:2px;background:var(--bg3);border-radius:3px;margin-bottom:2px;">'+
+                c.name+'（'+c.faction+'）能力'+c.ability+
+                ' <button style="font-size:.58em;" onclick="Game.performAction(\'留用人才\',{candidateId:\''+c.id+'\'})" title="留用该人才，进入闲置官员">留用</button>'+
+                ' <button style="font-size:.58em;" onclick="Game.performAction(\'不留用人才\',{candidateId:\''+c.id+'\'})" title="不留用该人才">不留用</button>'+
+                '</div>';
+        });
+    }
+    var secretHtml='';
+    s.secretReports.forEach(function(sr){
+        secretHtml+='<div style="font-size:.65em;padding:2px;">密奏调查：'+sr.target+'（剩'+sr.remainingMonths+'月）'+
+            (sr.remainingMonths<=0&&sr.found?' 发现'+sr.found+'！'+
+                '<button style="font-size:.58em;" onclick="Game.performAction(\'处理密奏\',{reportId:\''+sr.id+'\',decision:\'压下\'})">压下</button>'+
+                '<button style="font-size:.58em;" onclick="Game.performAction(\'处理密奏\',{reportId:\''+sr.id+'\',decision:\'警告\'})">警告</button>'+
+                '<button style="font-size:.58em;" onclick="Game.performAction(\'处理密奏\',{reportId:\''+sr.id+'\',decision:\'贬官\'})">贬官</button>'+
+                '<button style="font-size:.58em;" onclick="Game.performAction(\'处理密奏\',{reportId:\''+sr.id+'\',decision:\'抄家\'})">抄家</button>'+
+                '<button style="font-size:.58em;" onclick="Game.performAction(\'处理密奏\',{reportId:\''+sr.id+'\',decision:\'处死\'})">处死</button>':'')+'</div>';
+    });
+    var commerceHtml='<div style="font-size:.62em;margin-top:4px;">商业管理：市舶司Lv'+(s.commerce.市舶司||0)+' 商路Lv'+(s.commerce.商路||0)+' 盐引Lv'+(s.commerce.盐引||0)+' 茶马互市Lv'+(s.commerce.茶马互市||0)+'</div>';
+    return{title:'内政',content:'<p>科举：'+s.examsHeld+'次</p>'+candHtml+secretHtml+commerceHtml,actions:'<button onclick="Game.performAction(\'考核官员\')" '+(isActionUsed('考核官员')?'disabled':'')+' title="考核百官，花费5万两，声望+2，文官+3">考核（-5万）</button><button onclick="Game.performAction(\'开科取士\')" title="开科取士，花费50万两，3个月后获得人才">开科（-50万）</button><button onclick="Game.performAction(\'宴请大臣\')" '+(isActionUsed('宴请大臣')?'disabled':'')+' title="宴请大臣，花费30万两，官员好感+8">宴请（-30万）</button><button onclick="Game.performAction(\'密奏调查\',{targetName:prompt(\'输入调查对象姓名：\')})" title="密奏调查：花费30万两，2个月后获取罪证">密奏调查</button><button onclick="Game.performAction(\'廷议\',{issueName:prompt(\'输入廷议事项：\')})" title="廷议：重大事项投票，影响政策">廷议</button>'};
+}
+function rMilitary(s){
+    var totalArmy=0;Object.keys(s.army).forEach(function(k){totalArmy+=Number(s.army[k])||0;});
+    var units='';
+    Object.keys(s.army).forEach(function(k){
+        units+='<div style="background:var(--bg3);padding:4px;border-radius:3px;text-align:center;font-size:.62em;">'+k+'<br><strong>'+fmt(s.army[k])+'</strong><br><span style="color:var(--text2);">战力'+(ARMY_TYPES[k]?ARMY_TYPES[k].power:30)+' 装备Lv'+(s.armyEquipment[k]||0)+'</span></div>';
+    });
+    var activeWars=s.ongoingActions.filter(function(a){return a.type==='出征';}).map(function(a){return a.general+'出征'+a.target;}).join('、')||'无';
+    var atWarList=s.atWarWith.length?s.atWarWith.join('、'):'无';
+    var genHtml='';
+    s.generals.forEach(function(g){
+        genHtml+='<div style="font-size:.62em;padding:2px;">'+g.name+'（统率'+g.command+' 武勇'+g.force+' 智谋'+g.wisdom+' 忠诚'+g.loyalty+' 经验'+g.experience+'）</div>';
+    });
+    return{title:'军事',content:'<p>总兵力：<strong>'+fmt(totalArmy)+'</strong> | 士气：'+s.armyMorale+' | 全军战力：<strong style="color:var(--gold-light);">'+s.armyPower+'</strong></p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(65px,1fr));gap:3px;">'+units+'</div><p style="font-size:.65em;">出征中：'+activeWars+'</p><p style="font-size:.65em;">交战中：'+atWarList+'</p><p style="font-size:.65em;"><strong>将领：</strong></p>'+genHtml,actions:'<div style="font-size:.65em;width:100%;">扩军：<select id="selUnit">'+Object.keys(s.army).map(function(k){return '<option value="'+k+'">'+k+'('+(ARMY_TYPES[k]?ARMY_TYPES[k].cost:3)+'两/人)</option>';}).join('')+'</select><input type="number" id="selAmount" value="10000" style="width:50px;"><button onclick="Game.performAction(\'扩军\',{unit:document.getElementById(\'selUnit\').value,amount:parseInt(document.getElementById(\'selAmount\').value)||10000})" title="扩军：消耗银两，增加指定兵种">扩军</button></div>'+
+        '<div style="font-size:.65em;width:100%;">裁军：<select id="selCutUnit">'+Object.keys(s.army).map(function(k){return '<option value="'+k+'">'+k+'</option>';}).join('')+'</select><input type="number" id="selCutAmount" value="10000" style="width:50px;"><button onclick="Game.performAction(\'裁军\',{unit:document.getElementById(\'selCutUnit\').value,amount:parseInt(document.getElementById(\'selCutAmount\').value)||10000})" title="裁军：支付遣散费（单兵费用30%），士气-1">裁军</button></div>'+
+        '<div style="font-size:.65em;width:100%;">出征：<select id="selTarget">'+s.armyTargets.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select><select id="selArmyUnit">'+Object.keys(s.army).map(function(k){return '<option value="'+k+'">'+k+'</option>';}).join('')+'</select><input type="number" id="selArmyAmt" value="50000" style="width:50px;"><select id="selGeneral">'+s.generals.map(function(g){return '<option>'+g.name+'</option>';}).join('')+'</select><select id="selTactic"><option>强攻</option><option>围困</option><option>奇袭</option><option>诱敌</option><option>退守</option></select><button onclick="Game.performAction(\'出征\',{target:document.getElementById(\'selTarget\').value,unit:document.getElementById(\'selArmyUnit\').value,amount:parseInt(document.getElementById(\'selArmyAmt\').value)||50000,general:document.getElementById(\'selGeneral\').value,tactic:document.getElementById(\'selTactic\').value})" title="出征：消耗银两粮草，战术影响胜率与消耗">出征</button></div>'+
+        '<div style="font-size:.65em;width:100%;">军械改良：<select id="selEqType">'+Object.keys(s.armyEquipment).map(function(k){return '<option value="'+k+'">'+k+'</option>';}).join('')+'</select><button onclick="Game.performAction(\'军械制造\',{equipType:document.getElementById(\'selEqType\').value})" title="军械改良：花费30万两+500铁矿，装备+1级">军械改良</button></div>'+
+        '<button onclick="Game.performAction(\'军事训练\')" '+(isActionUsed('军事训练')?'disabled':'')+' title="训练：花费50万两，士气+5，战力+3">训练（-50万）</button>'};
+}
+function rFinance(s){
+    var invHtml='';
+    s.investigations.forEach(function(inv){
+        var action='';
+        if(inv.remainingMonths<=0){
+            action=inv.found?'<button onclick="Game.performAction(\'抄家\',{investigationId:\''+inv.id+'\'})" style="font-size:.58em;" title="抄家：国库+500万">💰抄家</button>':'未查到';
+        }
+        invHtml+='<div style="font-size:.65em;padding:2px;">调查：'+inv.target+'（剩'+inv.remainingMonths+'月）'+action+'</div>';
+    });
+    return{title:'财政',content:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.72em;"><div>💰国库<br><strong>'+fmt(s.treasury)+'两</strong></div><div>⛏️铁矿<br>'+fmt(s.iron)+'</div></div>'+(invHtml?'<p style="font-size:.65em;"><strong>调查：</strong></p>'+invHtml:''),actions:'<button onclick="Game.performAction(\'加税\')" '+(isActionUsed('加税')?'disabled':'')+' title="加税：国库+300万两，民心-15">加税</button><button onclick="Game.performAction(\'减税\')" '+(isActionUsed('减税')?'disabled':'')+' title="减税：花费200万两，民心+9">减税</button><button onclick="Game.performAction(\'赈灾\')" '+(isActionUsed('赈灾')?'disabled':'')+' title="赈灾：花费300万两和2万石粮，民心+10">赈灾</button><button onclick="Game.performAction(\'开矿\')" '+(isActionUsed('开矿')?'disabled':'')+' title="开矿：花费150万两，国库+200万，铁矿+2000">开矿</button><button onclick="Game.performAction(\'铸钱\')" '+(isActionUsed('铸钱')?'disabled':'')+' title="铸钱：消耗50万银和1000铁矿，国库+150万">铸钱</button><button onclick="Game.performAction(\'锦衣卫调查\',{target:\'某官员\'})" title="锦衣卫调查：花费20万两，3个月后50%概率发现证据">调查</button>'};
+}
+function rHarem(s){
+    var preg=s.harem.members.filter(function(m){return m.pregnant;}).length;
+    var memHtml='';
+    s.harem.members.forEach(function(m){
+        memHtml+='<div style="font-size:.62em;padding:2px;background:var(--bg3);border-radius:3px;margin-bottom:2px;"><span>'+m.rank+'</span> <strong>'+m.name+'</strong> '+m.age+'岁 宠爱'+m.favor+' 健康'+(m.health||80)+' 家世'+m.family+' 性格'+m.personality+(m.pregnant?'<span style="color:var(--red-light);">孕'+m.pregnancyMonth+'月</span>':'')+' <button style="font-size:.55em;padding:2px 4px;" onclick="Game.performAction(\'临幸\',{memberId:\''+m.id+'\'})"'+(m.pregnant||s.harem.loveCount>=3?'disabled':'')+' title="宠幸：宠爱+3，健康-2，可能怀孕">宠幸</button></div>';
+    });
+    return{title:'后宫管理（佳丽'+s.harem.members.length+'人 在孕'+preg+' 已临幸'+s.harem.loveCount+'/3）',content:'<div style="font-size:.62em;margin-bottom:3px;">奶妈'+s.harem.nannies+' 接生婆'+s.harem.midwives+' 用度'+s.harem.budget+'两/月</div><div style="max-height:160px;overflow-y:auto;">'+memHtml+'</div>',actions:'<button onclick="Game.performAction(\'选秀\')" '+(isActionUsed('选秀')?'disabled':'')+' title="选秀：花费100万两，新增佳丽，高家世可能增加外戚">选秀(-100万)</button><button onclick="Game.performAction(\'宫宴\')" '+(isActionUsed('宫宴')?'disabled':'')+' title="宫宴：花费50万两，所有佳丽宠爱+3">宫宴(-50万)</button><button onclick="Game.performAction(\'招募奶妈\')" title="招募奶妈：花费10万两">奶妈(-10万)</button><button onclick="Game.performAction(\'招募接生婆\')" title="招募接生婆：花费15万两">接生婆(-15万)</button><button onclick="Game.performAction(\'一键分配奶妈\')" title="为怀孕佳丽自动分配奶妈">分配奶妈</button><button onclick="Game.performAction(\'一键分配接生婆\')" title="为怀孕佳丽自动分配接生婆">分配接生婆</button><div style="font-size:.62em;width:100%;">用度：<input type="number" id="haremBudget" value="'+s.harem.budget+'" style="width:60px;"><button onclick="Game.performAction(\'调后宫用度\',{amount:parseInt(document.getElementById(\'haremBudget\').value)||5000})" title="调整后宫用度，影响宠爱度与健康">调整</button></div>'};
+}
+function rOfficials(s){
+    var offHtml='';
+    var prim=s.officials.内阁首辅;
+    if(prim){
+        offHtml+='<div style="font-size:.65em;padding:2px;background:var(--bg3);border-radius:3px;margin-bottom:2px;">👤<strong>'+prim.name+'</strong>（首辅）能力'+prim.ability+' 道德'+prim.morality+' 武力'+prim.force+' 文学'+prim.literature+' 智慧'+prim.wisdom+' 忠诚'+prim.loyalty+' 好感'+prim.favor+'</div>';
+    }
+    Object.keys(s.officials.六部尚书).forEach(function(dept){
+        var off=s.officials.六部尚书[dept];
+        if(off)offHtml+='<div style="font-size:.65em;padding:2px;background:var(--bg3);border-radius:3px;margin-bottom:2px;">👤<strong>'+off.name+'</strong>（'+dept+'）能力'+off.ability+' 道德'+off.morality+' 武力'+off.force+' 文学'+off.literature+' 智慧'+off.wisdom+' 忠诚'+off.loyalty+' 好感'+off.favor+'</div>';
+    });
+    var idleHtml='';
+    s.idleOfficials.forEach(function(o){
+        idleHtml+='<div style="font-size:.62em;padding:1px 0;">'+o.name+'（能力'+o.ability+' 武力'+o.force+' 智慧'+o.wisdom+'）';
+        idleHtml+=' <button style="font-size:.55em;" onclick="Game.performAction(\'官员调换\',{fromName:\''+o.name+'\',toPost:\'内阁首辅\'})">调为首辅</button>';
+        Object.keys(s.officials.六部尚书).forEach(function(dept){
+            idleHtml+=' <button style="font-size:.55em;" onclick="Game.performAction(\'官员调换\',{fromName:\''+o.name+'\',toPost:\''+dept+'\'})">调为'+dept+'</button>';
+        });
+        idleHtml+='</div>';
+    });
+    return{title:'官员系统（闲置'+s.idleOfficials.length+'人）',content:'<p style="font-size:.68em;"><strong>现任官员：</strong></p>'+offHtml+'<p style="font-size:.68em;"><strong>闲置官员：</strong></p>'+idleHtml,actions:'<button onclick="Game.performAction(\'宴请大臣\')" '+(isActionUsed('宴请大臣')?'disabled':'')+' title="宴请大臣：花费30万两，官员好感+8">宴请(-30万)</button>'};
+}
+function rProvinces(s){
+    var html='';
+    s.provinces.forEach(function(p){
+        var ev=s.provinceEvents.find(function(e){return e.provinceId===p.id&&!e.handled;});
+        var evHtml='';
+        if(ev){
+            evHtml='<div style="background:var(--red);padding:3px;font-size:.58em;">⚠️'+ev.type+'：';
+            ev.options.forEach(function(o,oi){
+                evHtml+='<button style="font-size:.58em;" onclick="Game.handleProvinceEvent(\''+ev.id+'\','+oi+')" title="'+o.label+'">'+o.label+'</button>';
+            });
+            evHtml+='</div>';
+        }
+        html+='<div style="background:var(--bg3);padding:4px;border-radius:3px;margin-bottom:3px;font-size:.68em;"><strong>'+p.name+'</strong> 知府'+p.governor+' 民心'+p.citizenry+' 等级'+p.level+' '+p.special+' '+evHtml+'</div>';
+    });
+    return{title:'州府管理（'+s.provinces.length+'州）',content:html,actions:'<span style="font-size:.6em;">地方制度：'+s.localSystem+'</span>'};
+}
+function rInfra(s){
+    var defs=getBuildDefinitions();
+    var actions='';
+    Object.keys(defs).forEach(function(k){
+        actions+='<button style="font-size:.6em;" onclick="Game.performAction(\'建造\',{buildType:\''+k+'\'})" title="建造'+defs[k].name+'：花费'+fmt(defs[k].cost)+'两，工期'+defs[k].months+'个月，效果：'+defs[k].desc+'">'+defs[k].name+'('+fmt(defs[k].cost)+')</button>';
+    });
+    // 显示当前建筑等级及增益说明
+    var infoHtml='';
+    Object.keys(defs).forEach(function(k){
+        infoHtml+='<div style="font-size:.62em;padding:1px 0;">'+defs[k].name+' Lv'+(s.infrastructure[k]||0)+'：'+defs[k].desc+'</div>';
+    });
+    return{title:'基础设施',content:'<div style="font-size:.65em;max-height:200px;overflow-y:auto;">'+infoHtml+'</div>',actions:actions};
+}
+function rDiplomacy(s){
+    var html='';
+    s.diplomacy.forEach(function(d){
+        var war=d.atWar;
+        var hasDaughter=s.heirs.some(function(h){return h.gender==='皇女'&&h.age>=15;});
+        var rel=d.relation;
+        var trade=d.tradeAgreement?'🤝':'无';
+        var ally=d.wartimeAlly?'⚔️盟友':'无';
+        html+='<div style="background:var(--bg3);padding:4px;border-radius:3px;margin-bottom:3px;font-size:.65em;display:flex;flex-wrap:wrap;gap:2px;"><span>'+d.name+'</span><span>关系'+rel+'</span><span>好战'+d.aggression+'</span><span>兵力'+fmt(d.army)+'</span><span>人口'+d.population+'万</span><span>城池'+d.cities+'</span><span>贸易：'+trade+'</span><span>盟约：'+ally+'</span>'+(war?'<span style="color:var(--red-light);">交战中</span>':'')+(war?'<button style="font-size:.56em;" onclick="Game.performAction(\'求和\',{target:\''+d.name+'\'})" title="求和：花费200万两，关系+20">求和</button>':'<button style="font-size:.56em;" onclick="Game.performAction(\'遣使\',{target:\''+d.name+'\'})" title="遣使：花费50万两，关系+5，可能达成贸易">遣使</button>'+(hasDaughter?'<button style="font-size:.56em;" onclick="Game.performAction(\'和亲\',{target:\''+d.name+'\'})" title="和亲：需皇女≥15岁，关系+20，民心+5">和亲</button>':''))+'</div>';
+    });
+    return{title:'外交（'+s.diplomacy.length+'国）',content:html,actions:''};
+}
+function rScout(s){
+    var html='<p style="font-size:.65em;">侦查邻国（-50万两，3个月）：获得兵力、人口、城池、将领、兵种、城防、粮草情报。有概率被敌国发现导致关系下降。</p>';
+    s.diplomacy.forEach(function(d){
+        html+='<div style="font-size:.62em;">'+d.name+' <button style="font-size:.58em;" onclick="Game.performAction(\'侦查\',{target:\''+d.name+'\'})" title="侦查：花费50万两，3个月后获得情报">侦查</button></div>';
+    });
+    return{title:'侦查系统',content:html,actions:''};
+}
+function rTech(s){
+    var defs={农业:['粮产+5%/级',500000],军事:['战力+3%/级',800000],商业:['税收+5%/级',400000],文化:['文官+3/级',600000],工业:['建造+10%/级',1000000],医药:['疫情-10%/级',700000]};
+    var html='';
+    Object.keys(defs).forEach(function(k){
+        html+='<div style="background:var(--bg3);padding:4px;border-radius:3px;margin-bottom:3px;font-size:.65em;display:flex;justify-content:space-between;"><span>'+k+'Lv'+(s.technology[k]||0)+' <small>'+defs[k][0]+'</small></span><button style="font-size:.58em;" onclick="Game.performAction(\'研究科技\',{tech:\''+k+'\'})" '+(s.techResearchThisMonth>=2?'disabled':'')+' title="研究'+k+'：花费'+fmt(defs[k][1])+'两，等级+1，效果：'+defs[k][0]+'">研究('+fmt(defs[k][1])+')</button></div>';
+    });
+    return{title:'科技研究（本月'+s.techResearchThisMonth+'/2次）',content:html,actions:''};
+}
+function rPolicy(s){
+    var html='';
+    POLICIES.forEach(function(p){
+        html+='<div style="background:var(--bg3);padding:4px;border-radius:3px;margin-bottom:3px;font-size:.62em;"><strong>'+p.name+'</strong>（'+fmt(p.cost)+'两/'+p.duration+'月）<small>'+p.effect+' | 负面：'+p.neg+'</small><button style="font-size:.56em;" onclick="Game.performAction(\'颁布国策\',{name:\''+p.name+'\',cost:'+p.cost+',duration:'+p.duration+',effect:\''+p.effect+'\',neg:\''+p.neg+'\'})" title="颁布国策：花费'+fmt(p.cost)+'两，持续'+p.duration+'个月，效果：'+p.effect+'，负面：'+p.neg+'">颁布</button></div>';
+    });
+    var lsHtml='';
+    LOCAL_SYSTEMS.forEach(function(ls){
+        lsHtml+='<button style="font-size:.58em;" onclick="Game.performAction(\'设置地方制度\',{system:\''+ls.name+'\'})" title="设置地方制度：'+ls.desc+' | 负面：'+ls.neg+'">'+ls.name+'（'+ls.desc+' | '+ls.neg+'）</button>';
+    });
+    return{title:'国策与地方制度',content:'<p style="font-size:.62em;">当前国策：'+(s.nationalPolicy?s.nationalPolicy.name+'（剩'+s.nationalPolicy.remainingMonths+'月）':'无')+'</p>'+html+'<p style="font-size:.62em;margin-top:4px;"><strong>地方制度：</strong>'+s.localSystem+'</p><div style="display:flex;flex-wrap:wrap;gap:2px;">'+lsHtml+'</div>',actions:''};
+}
+function rHeirs(s){
+    if(!s.heirs.length)return{title:'子嗣',content:'<p>暂无子嗣。</p>',actions:''};
+    var html='';
+    s.heirs.forEach(function(h){
+        html+='<div style="background:var(--bg3);padding:4px;border-radius:3px;margin-bottom:3px;font-size:.65em;">👶<strong>'+h.name+'</strong>（'+h.gender+'，'+h.age+'岁）武'+h.abilities.武力+' 智'+h.abilities.智力+' 性格'+h.personality+' 天赋'+h.talent+' <button style="font-size:.58em;" onclick="Game.performAction(\'培养子嗣\',{heirId:\''+h.id+'\'})" title="培养子嗣：花费5万两，武力+2，智力+2">培养</button></div>';
+    });
+    return{title:'子嗣养成',content:html,actions:''};
+}
+function rMedic(s){
+    return{title:'御医系统',content:'<p style="font-size:.72em;">当前健康：<strong style="color:var(--gold-light);">'+s.emperorHealth+'/'+(s.emperorHealthMax||100)+'</strong></p>',actions:'<button onclick="Game.performAction(\'把脉\')" '+(isActionUsed('把脉')?'disabled':'')+' title="把脉：花费5万两，健康+5~10">把脉(-5万)</button><button onclick="Game.performAction(\'吃药\')" '+(isActionUsed('吃药')?'disabled':'')+' title="吃药：花费20万两，健康+12~20">吃药(-20万)</button>'};
+}
+function rCultivation(s){
+    if(!s.cultivation.unlocked)return{title:'修仙',content:'<p>修仙未解锁。第5年自动解锁。</p>',actions:''};
+    var expPercent=Math.floor((Number(s.cultivation.cultivationExp)||0)/(Number(s.cultivation.cultivationMaxExp)||100)*100);
+    var pillHtml='';
+    if(s.cultivation.pills.length){
+        pillHtml='<p style="font-size:.62em;">丹药：</p>';
+        s.cultivation.pills.forEach(function(p,idx){
+            pillHtml+='<div style="font-size:.62em;padding:1px 0;">'+p.quality+'灵丹 <button style="font-size:.58em;" onclick="Game.performAction(\'服用丹药\',{pillIndex:'+idx+'})" title="服用丹药：获得修为">服用</button></div>';
+        });
+    }
+    var methodHtml='<p style="font-size:.62em;">功法：'+s.cultivation.method+'</p>';
+    CULTIVATION_METHODS.forEach(function(m){
+        methodHtml+='<button style="font-size:.58em;" onclick="Game.performAction(\'学习功法\',{methodName:\''+m.name+'\'})" title="学习功法：花费300万两，'+m.desc+'">'+m.name+'</button> ';
+    });
+    var beastHtml='';
+    s.spiritBeasts.forEach(function(b){
+        beastHtml+='<div style="font-size:.62em;">🐉 '+b.name+'（'+b.bonus+'）</div>';
+    });
+    return{title:'修仙·'+s.cultivation.realm,content:'<p>境界：'+s.cultivation.realm+'</p><p>修为：'+(Number(s.cultivation.cultivationExp)||0)+'/'+(Number(s.cultivation.cultivationMaxExp)||100)+'（'+expPercent+'%）</p><p>灵兽：'+s.spiritBeasts.length+'只</p>'+methodHtml+beastHtml+pillHtml,actions:'<button onclick="Game.performAction(\'修炼\')" '+(isActionUsed('修炼')?'disabled':'')+' title="修炼：免费，获得修为，可能突破">修炼</button><button onclick="Game.performAction(\'炼丹\')" '+(isActionUsed('炼丹')?'disabled':'')+' title="炼丹：花费100万两，80%成功获得灵丹">炼丹</button><button onclick="Game.performAction(\'驯养灵兽\')" '+(isActionUsed('驯养灵兽')?'disabled':'')+' title="驯养灵兽：花费200万两，获得灵兽">驯灵兽</button>'};
+}
+        // ========== 百科页面 ==========
+        function rEncyclopedia(s){
+            var armyHtml='';
+            Object.keys(ARMY_TYPES).forEach(function(k){
+                armyHtml+='<div style="font-size:.65em;padding:2px;">⚔️ <strong>'+k+'</strong>（'+ARMY_TYPES[k].cost+'两/人，战力'+ARMY_TYPES[k].power+'）：'+ARMY_TYPES[k].desc+'</div>';
+            });
+            var policyHtml='';
+            POLICIES.forEach(function(p){
+                policyHtml+='<div style="font-size:.65em;padding:2px;">📜 <strong>'+p.name+'</strong>：'+p.effect+' | 负面：'+p.neg+'</div>';
+            });
+            var sysHtml='';
+            LOCAL_SYSTEMS.forEach(function(sys){
+                sysHtml+='<div style="font-size:.65em;padding:2px;">🏙️ <strong>'+sys.name+'</strong>：'+sys.desc+' | 负面：'+sys.neg+'</div>';
+            });
+            var methodHtml='';
+            CULTIVATION_METHODS.forEach(function(m){
+                methodHtml+='<div style="font-size:.65em;padding:2px;">📜 <strong>'+m.name+'</strong>：修炼速度x'+m.speed+'，突破概率+'+Math.floor(m.breakRate*100)+'%</div>';
+            });
+            // 基建增益说明
+            var buildHtml='';
+            var defs=getBuildDefinitions();
+            Object.keys(defs).forEach(function(k){
+                buildHtml+='<div style="font-size:.62em;padding:1px 0;">🔨 <strong>'+defs[k].name+'</strong>（'+defs[k].cat+'）Lv'+(s.infrastructure[k]||0)+'：'+defs[k].desc+'，花费'+fmt(defs[k].cost)+'两，工期'+defs[k].months+'个月</div>';
+            });
+            var opGuide='<h4 style="font-size:.75em;color:var(--gold);margin-top:6px;">📋 操作指南（所有按钮效果）</h4>';
+            opGuide+='<div style="font-size:.65em;line-height:1.5;">';
+            opGuide+='<p><b>上朝</b>：开启朝会，处理议题，获得声望+1。</p>';
+            opGuide+='<p><b>处理议题</b>：根据选项产生不同效果，详见议题描述。</p>';
+            opGuide+='<p><b>跳议题</b>：跳过非必须议题，声望-1。</p>';
+            opGuide+='<p><b>退朝</b>：结束朝会，必须处理完红框议题。全部处理可积累勤政奖励。</p>';
+            opGuide+='<p><b>考核官员</b>：花费5万两，声望+2，文官+3。发现政绩突出者行政效率临时+2。</p>';
+            opGuide+='<p><b>开科取士</b>：花费50万两，3个月后获得5名人才，文官+5。有人才能力≥80时声望+1。</p>';
+            opGuide+='<p><b>密奏调查</b>：花费30万两，2个月后获取官员罪证，可压下、警告、贬官、抄家、处死。宽仁处理民心+1。</p>';
+            opGuide+='<p><b>廷议</b>：重大事项朝堂投票，支持率≥70%政策成本降10%，支持率低则声望下降。</p>';
+            opGuide+='<p><b>官员调换</b>：闲置官员可调换到现有官职，现任官员忠诚-10进入闲置。人尽其才事件：礼部尚书文学≥80时忠诚+5、效率+1。</p>';
+            opGuide+='<p><b>扩军</b>：消耗银两，增加指定兵种数量。</p>';
+            opGuide+='<p><b>裁军</b>：支付遣散费（单兵费用30%），士气-1。裁军≥5万时民心+1。</p>';
+            opGuide+='<p><b>军事训练</b>：花费50万两，士气+5，战力+3。</p>';
+            opGuide+='<p><b>军械改良</b>：花费30万两+500铁矿，兵种装备+1级，士气+1。</p>';
+            opGuide+='<p><b>出征</b>：消耗银两粮草，可选战术。胜利后获人口、士兵、州府，将领成长，军威大振。</p>';
+            opGuide+='<p><b>侦查</b>：花费50万两，3个月后获得详细情报，可能被发现关系-5。</p>';
+            opGuide+='<p><b>加税</b>：国库+300万，民心-15。</p>';
+            opGuide+='<p><b>减税</b>：花费200万，民心+9。</p>';
+            opGuide+='<p><b>赈灾</b>：花费300万和2万石粮，民心+10。</p>';
+            opGuide+='<p><b>开矿</b>：花费150万，国库+200万，铁矿+2000。</p>';
+            opGuide+='<p><b>铸钱</b>：花费50万银和1000铁矿，国库+150万。</p>';
+            opGuide+='<p><b>锦衣卫调查</b>：花费20万，3个月后50%概率发现证据。</p>';
+            opGuide+='<p><b>临幸</b>：宠爱+3，健康-2，每月限3次，可能怀孕。君恩深厚概率触发：宠爱额外+1、效率+1。</p>';
+            opGuide+='<p><b>选秀</b>：花费100万，新增佳丽，高家世增加外戚。得遇佳丽：国库+10万。</p>';
+            opGuide+='<p><b>宫宴</b>：花费50万，所有佳丽宠爱+3。全员宠爱≥50时后宫雍睦：健康+2、声望+1。</p>';
+            opGuide+='<p><b>修炼</b>：获得修为，功法影响速度，突破后提升境界。突破有额外奖励。</p>';
+            opGuide+='<p><b>炼丹</b>：花费100万，80%成功。上品/极品灵丹额外健康+5。</p>';
+            opGuide+='<p><b>服用丹药</b>：获得修为，上品/极品额外健康+5。</p>';
+            opGuide+='<p><b>学习功法</b>：花费300万，更换修炼功法。</p>';
+            opGuide+='<p><b>驯养灵兽</b>：花费200万，获得灵兽，灵兽每月随机触发正面事件。</p>';
+            opGuide+='<p><b>月度亮点</b>：每月结算时自动总结正面成果，给予小额随机奖励。</p>';
+            opGuide+='<p><b>年度总结</b>：每年1月根据全年表现授予年号奖励。</p>';
+            opGuide+='<p><b>小目标</b>：完成显示的小目标获得对应奖励。</p>';
+            opGuide+='<p><b>连续勤政</b>：连续3/6/12个月全勤上朝，获得递增奖励。</p>';
+            opGuide+='</div>';
+            return{
+                title:'百科全书',
+                content:'<h4 style="font-size:.75em;color:var(--gold);">📖 核心规则</h4>'+
+                    '<div style="font-size:.65em;padding:2px;">💰 <strong>税收公式</strong>：基础税收 = 人口×50 + 商业科技×3000 + 市集×5000 + 建筑加成。实际税收 = 基础税收 ×（0.8 + 效率/100×0.4）× 贸易系数。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">📊 <strong>赋税明细</strong>：每月结算时在行为记录中显示：基础税收、效率系数、贸易/商业系数、实际税收、军费、其他支出、净收入。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">⚡ <strong>行政效率</strong>：受官员能力、皇帝健康、民心、地方制度、驿站官道、文化工业科技、修仙境界影响。效率越高税收越高、军费越少。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">⛏️ <strong>铁矿</strong>：用于铸钱、建造、军械改良。开矿可增加铁矿。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">💖 <strong>民心</strong>：受税收、赈灾、事件影响。民心达到80/90/100触发阶段奖励。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">👸 <strong>后宫</strong>：宠爱度低于20触发事件，临幸每月限3次。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">💍 <strong>和亲</strong>：需皇女≥15岁。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">🤝 <strong>贸易往来</strong>：关系≥60并遣使可达成，经济增长+5%。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">⚔️ <strong>派系斗争</strong>：每月可能触发，需平衡五派系。和稀泥可获朝野安定效果。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">🏆 <strong>战争胜利</strong>：获取敌国60%人口，俘虏30%士兵编入边军，按城池增加州府，将领成长。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">🛡️ <strong>军械改良</strong>：提升兵种装备等级，增加全军战力。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">🌟 <strong>历史名将</strong>：官员与历史名将同名时自动提升属性。</div>'+
+                    '<div style="font-size:.65em;padding:2px;">📊 <strong>成就奖励</strong>：解锁成就会给予资源或永久加成。</div>'+
+                    '<h4 style="font-size:.75em;color:var(--gold);margin-top:6px;">🔨 基建增益明细</h4>'+buildHtml+
+                    '<h4 style="font-size:.75em;color:var(--gold);margin-top:6px;">⚔️ 军种属性</h4>'+armyHtml+
+                    '<h4 style="font-size:.75em;color:var(--gold);margin-top:6px;">📜 国策效果</h4>'+policyHtml+
+                    '<h4 style="font-size:.75em;color:var(--gold);margin-top:6px;">🏙️ 地方制度</h4>'+sysHtml+
+                    '<h4 style="font-size:.75em;color:var(--gold);margin-top:6px;">📜 功法</h4>'+methodHtml+
+                    opGuide+
+                    '<h4 style="font-size:.75em;color:var(--gold);margin-top:6px;">💾 存档管理</h4>'+
+                    '<div style="font-size:.65em;padding:2px;">📤 导出：点击「导出」按钮下载JSON存档文件。📥 导入：点击「导入」按钮恢复进度。</div>'+
+                    '<button onclick="Game.showTutorial()" style="margin-top:4px;" title="查看新手教程">📖 查看新手教程</button>',
+                actions:''
+            };
+        }
+
+        // ========== 成就页面 ==========
+        function rAchievements(s){
+            var html='';
+            s.achievements.forEach(function(a){
+                html+='<div style="font-size:.65em;padding:2px;">🏆'+a.name+(a.desc?' - '+a.desc:'')+'</div>';
+            });
+            if(s.achievementBonus && Object.keys(s.achievementBonus).length>0){
+                html+='<p style="font-size:.65em;margin-top:4px;">成就加成：</p>';
+                if(s.achievementBonus.taxRate)html+='<div style="font-size:.62em;">税收+'+(s.achievementBonus.taxRate*100)+'%</div>';
+            }
+            if(s.emperorHealthMax>100)html+='<div style="font-size:.62em;">健康上限+'+((s.emperorHealthMax||100)-100)+'</div>';
+            return{title:'成就（'+s.achievements.length+'个）',content:html||'<p>尚未解锁成就。</p>',actions:''};
+        }
+
+        // ========== 切换页签 ==========
+        function switchTab(tab){
+            if(tab==='cultivation'&&!gameState.cultivation.unlocked){showToast('修仙未解锁','danger');return;}
+            currentTab=tab;
+            refreshUI();
+        }
+
+        // ========== 更新公告 ==========
+        function showUpdateNotice(){
+            var key='update_notice_v9_balance_fix';
+            if(localStorage.getItem(key))return;
+            showModal('📢 更新公告','<div style="font-size:.82em;line-height:1.6;">'+
+                '<p><strong>🔧 本次更新：</strong></p>'+
+                '<p>✅ 修复新存档人口为0导致游戏结束的问题</p>'+
+                '<p>✅ 修复旧存档按钮无响应问题</p>'+
+                '<p>✅ 新增赋税明细日志：每月显示基础税收、效率系数、贸易系数、实际税收、军费、净收入</p>'+
+                '<p>✅ 新增基建增益明细：百科中显示所有建筑等级、花费、工期、效果</p>'+
+                '<p>✅ 优化数值转换：所有资源字段强制 Number 转换，避免 NaN</p>'+
+                '<p>✅ 保留所有已有功能与正向反馈机制</p>'+
+                '<p>💾 完全兼容旧存档</p></div>',
+                [{label:'我知道了',onclick:'Game.closeModal();localStorage.setItem(\''+key+'\',\'1\');'}]);
+        }
+
+        // ========== 新手教程 ==========
+        function showTutorial(){
+            showModal('📖 新手教程','<div style="font-size:.8em;line-height:1.6;">'+
+                '<p><strong>欢迎来到模拟王朝！</strong></p>'+
+                '<p>你将成为一位皇帝，治理国家，开创千秋帝业。</p>'+
+                '<p><strong>基本操作：</strong></p>'+
+                '<p>• 点击左侧导航切换界面，查看国情、朝会、军事、财政等。</p>'+
+                '<p>• 点击「下个月」推进时间，每月自动结算税收、军费、事件等。</p>'+
+                '<p>• 朝会每月可上朝一次，红框议题必须处理。</p>'+
+                '<p><strong>资源与属性：</strong></p>'+
+                '<p>• 国库、粮储、铁矿、人口、民心、声望、行政效率。</p>'+
+                '<p>• 五派系（文官、武将、宗室、外戚、宦官）影响朝堂稳定。</p>'+
+                '<p><strong>赋税说明：</strong></p>'+
+                '<p>• 每月结算时行为记录会显示赋税明细。</p>'+
+                '<p>• 税收受人口、商业科技、市集、行政效率、贸易系数影响。</p>'+
+                '<p><strong>关键系统：</strong></p>'+
+                '<p>• 后宫：临幸每月限3次，怀孕生子，培养子嗣。</p>'+
+                '<p>• 军事：扩军、裁军、训练、出征、军械改良。胜利后收获丰厚。</p>'+
+                '<p>• 外交：遣使、和亲、贸易往来，25个邻国。</p>'+
+                '<p>• 修仙：第5年解锁，修炼功法、炼丹服用、驯养灵兽。</p>'+
+                '<p><strong>正向反馈：</strong></p>'+
+                '<p>• 月度亮点：每月自动总结并给予奖励。</p>'+
+                '<p>• 年度总结：每年1月授予年号奖励。</p>'+
+                '<p>• 小目标：完成显示的目标获得奖励。</p>'+
+                '<p>• 连续勤政：连续上朝获得递增奖励。</p>'+
+                '<p>• 成就奖励：解锁成就会给予资源或永久加成。</p>'+
+                '<p><strong>难度：</strong>标准模式平衡，硬核模式税收-20%、敌国好战+10%、初始资源-20%、初始人口-10%。</p>'+
+                '<p><strong>存档：</strong>自动保存，可导出导入。</p></div>',
+                [{label:'开始游戏',onclick:'Game.closeModal();'}]);
+        }
+
+        // ========== 初始化 ==========
+        function init(){
+            try{
+                showStartScreen();
+                updateSaveSlots();
+                showUpdateNotice();
+            }catch(e){
+                console.error('初始化失败',e);
+                alert('游戏初始化出错，请刷新页面重试。错误：'+e.message);
+            }
+        }
+
+        // ========== 返回对象 ==========
+        return{
+            init:init,
+            selectNovice:selectNovice,
+            onDifficultyChange:onDifficultyChange,
+            startNewGame:startNewGame,
+            continueGame:continueGame,
+            switchTab:switchTab,
+            performAction:performAction,
+            confirmAdvanceMonth:confirmAdvanceMonth,
+            _doAdvanceMonth:_doAdvanceMonth,
+            confirmReset:confirmReset,
+            _doReset:_doReset,
+            closeModal:closeModal,
+            saveToSlot:saveToSlot,
+            exportSave:exportSave,
+            importSave:importSave,
+            getState:function(){return gameState;},
+            updateSaveSlots:updateSaveSlots,
+            handleProvinceEvent:handleProvinceEvent,
+            handleFactionEvent:handleFactionEvent,
+            _gameOverToMenu:_gameOverToMenu,
+            showTutorial:showTutorial
+        };
+    })();
+    document.addEventListener('DOMContentLoaded',function(){
+        try{
+            Game.init();
+            window.Game=Game;
+        }catch(e){
+            console.error('加载失败',e);
+            alert('游戏加载失败，请刷新页面重试。错误：'+e.message);
+        }
+    });
+    </script>
+</body>
+</html>
